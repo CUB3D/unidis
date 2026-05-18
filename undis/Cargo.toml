@@ -1,0 +1,12 @@
+[package]
+name = "undis"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libunidis = {path = "../libunidis"}
+clap = {version = "=4.6.1", features = ["derive"]}
+anyhow = "=1.0.102"
+crossterm = "=0.29.0"
+# rich-rs = "=1.1.0"
+goblin = "=0.10.5"

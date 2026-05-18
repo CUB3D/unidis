@@ -1,0 +1,18 @@
+[package]
+name = "libunidis"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "libundis"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+libsla = "=1.2.0"
+anyhow = "=1.0.102"
+xmltree = "=0.12.0"
+clap = { version = "=4.6.1", features = ["derive"] }
+
+[target.wasm32-wasip1.dependencies]
+link-cplusplus = { version = "1", features = ["nothing"] }

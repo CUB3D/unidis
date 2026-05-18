@@ -1,0 +1,19 @@
+[target.wasm32-wasip1]
+#linker = "/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/bin/clang++"
+#linker = "rust-lld"
+linker = "/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/bin/wasm-ld"
+ar = "/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/bin/llvm-ar"
+rustflags = [
+	"-L", "/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot/lib/wasm32-wasi/eh", 
+	"-C", "link-arg=-lc++",
+	"-C", "link-arg=-lc++abi",
+	"-C", "link-arg=-lunwind",
+	#"-C", "link-arg=-fwasm-exceptions",
+]
+
+
+
+[env]
+WASI_SDK_PATH = "/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux"
+CXX_wasm32-wasip1 = "/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/bin/clang++"
+CXXFLAGS_wasm32-wasip1 = "--sysroot=/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot -I/home/cub3d/dextest/libunidis/_tmp/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot/include/c++/v1 -fwasm-exceptions -mllvm -wasm-use-legacy-eh=false"

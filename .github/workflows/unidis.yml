@@ -1,0 +1,26 @@
+name: Build kcal image
+
+on:
+  push:
+    paths: 
+      - 'unidis-web/**'
+      - 'libunidis/**'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and publish to GHCR
+        uses: macbre/push-to-ghcr@master
+        with:
+          image_name: cub3d/unidis-web
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          context: .
+          dockerfile: Dockerfile
+  

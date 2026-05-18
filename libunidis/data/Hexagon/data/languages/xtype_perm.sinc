@@ -1,0 +1,258 @@
+# XTYPE/PERM
+# XTYPE/PERM:CABAC
+define pcodeop decbin;
+with slot: iclass=0b1100  {
+    :D5_pair "=decbin(" S5_pair "," T5_pair ")" is imm_22_27=0b000111 & imm_21=0 & S5_pair & S5_pairi & imm_13=0 & T5_pair & T5_pairi & imm_6_7=0b11 & imm_5=0 & D5_pair {
+       D5_pair = decbin(S5_pairi, T5_pairi);
+    }
+}
+
+# XTYPE/PERM:sat
+define pcodeop sat;
+define pcodeop sath;
+define pcodeop satuh;
+define pcodeop satub;
+define pcodeop satb;
+with slot: iclass=0b1000  {
+    :D5 "=sat(" S5_pair ")" is imm_21_27=0b1000110 & S5_pair & S5_pairi & imm_8_13 & imm_5_7=0b000 & D5 & OUTPUT_D5 {
+    	local res:4 = S5_pairi:4;
+    	if(S5_pairi s>= 0) goto <notlow>;
+    	res = 0;
+    	USR_OVF = 1;
+    	<notlow>
+    	if(S5_pairi s<= 0x7FFFFFFF) goto <nothigh>;
+    	res = 0x7FFFFFFF;
+    	USR_OVF = 1;
+    	<nothigh>
+    	D5 = res;
+    }
+    :D5 "=sath(" S5 ")" is imm_21_27=0b1100110 & S5 & S5i & imm_8_13 & imm_5_7=0b100 & D5 & OUTPUT_D5 {
+        local res:4 = S5i:4;
+    	if(S5i s>= 0) goto <notlow>;
+    	res = 0;
+    	USR_OVF = 1;
+    	<notlow>
+    	if(S5i s<= 0x7FFF) goto <nothigh>;
+    	res = 0x7FFF;
+    	USR_OVF = 1;
+    	<nothigh>
+    	D5 = res;
+    }
+    :D5 "=satuh(" S5 ")" is imm_21_27=0b1100110 & S5 & S5i & imm_8_13 & imm_5_7=0b101 & D5 & OUTPUT_D5 {
+        local res:4 = S5i:4;
+    	if(S5i <= 0xFFFF) goto <nothigh>;
+    	res = 0xFFFF;
+    	USR_OVF = 1;
+    	<nothigh>
+    	D5 = res;
+    }
+    :D5 "=satub(" S5 ")" is imm_21_27=0b1100110 & S5 & S5i & imm_8_13 & imm_5_7=0b110 & D5 & OUTPUT_D5 {
+       local res:4 = S5i:4;
+    	if(S5i <= 0xFF) goto <nothigh>;
+    	res = 0xFF;
+    	USR_OVF = 1;
+    	<nothigh>
+    	D5 = res;
+    }
+    :D5 "=satb(" S5 ")" is imm_21_27=0b1100110 & S5 & S5i & imm_8_13 & imm_5_7=0b111 & D5 & OUTPUT_D5 {
+        local res:4 = S5i:4;
+    	if(S5i s>= 0) goto <notlow>;
+    	res = 0;
+    	USR_OVF = 1;
+    	<notlow>
+    	if(S5i s<= 0x7F) goto <nothigh>;
+    	res = 0x7F;
+    	USR_OVF = 1;
+    	<nothigh>
+    	D5 = res;
+    }
+}
+
+# XTYPE/PERM:swizzle
+with slot: iclass=0b1000  {
+    :D5 "=swiz(" S5 ")" is imm_21_27=0b1100100 & S5 & S5i & imm_8_13 & imm_5_7=0b111 & D5 & OUTPUT_D5 {
+    	local tmpo:4 = &D5;
+    	local tmpa:4 = &S5i;
+    	tmpa = tmpa + 3;
+    	
+    	*[register]:1 tmpo = *[register]:1 tmpa;
+    	tmpa = tmpa - 1;
+    	*[register]:1 tmpo = *[register]:1 tmpa;
+    	tmpa = tmpa - 1;
+    	*[register]:1 tmpo = *[register]:1 tmpa;
+    	tmpa = tmpa - 1;
+    	*[register]:1 tmpo = *[register]:1 tmpa;
+    }
+}
+
+# XTYPE/PERM:vector align
+with slot: iclass=0b1100  {
+    :D5_pair "=valignb(" T5_pair "," S5_pair "," imm_5_7u ")" is imm_23_27=0b00000 & imm_21_22=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_5_7u & D5_pair {
+        local u8:8 = imm_5_7u:8;
+        D5_pair = (S5_pairi >> (u8*8))|(T5_pairi << ((8-u8)*8));
+    }
+    :D5_pair "=valignb(" T5_pair "," S5_pair "," U2_5_6 ")" is imm_23_27=0b00100 & imm_21_22=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_7=0 & U2_5_6 & U2_5_6i & D5_pair {
+        #TODO: This is wrong due to PTRUE
+        D5_pair = S5_pairi >> ((zext(U2_5_6i) & 0x7)*8) | (T5_pairi << (8 - (zext(U2_5_6i) & 0x7))*8);
+    }
+}
+
+# XTYPE/PERM:vector round pack
+define pcodeop vrndwh;
+define pcodeop vrndwh_sat;
+with slot: iclass=0b1000  {
+    :D5 "=vrndwh(" S5_pair ")" is imm_21_27=0b1000100 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b100 & D5 & OUTPUT_D5 {
+       D5 = vrndwh(S5_pairi);
+    }
+    :D5 "=vrndwh(" S5_pair "):sat" is imm_21_27=0b1000100 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b110 & D5 & OUTPUT_D5 {
+       D5 = vrndwh_sat(S5_pairi);
+    }
+}
+
+# XTYPE/PERM:vec sat pck
+define pcodeop vsathub;
+define pcodeop vsatwh;
+define pcodeop vsatwuh;
+define pcodeop vsathb;
+with slot: iclass=0b1000  {
+    :D5 "=vsathub(" S5_pair ")" is imm_21_27=0b1000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b000 & D5 & OUTPUT_D5 {
+       D5 = vsathub(S5_pairi);
+    }
+    :D5 "=vsatwh(" S5_pair ")" is imm_21_27=0b1000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b010 & D5 & OUTPUT_D5 {
+       D5 = vsatwh(S5_pairi);
+    }
+    :D5 "=vsatwuh(" S5_pair ")" is imm_21_27=0b1000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b100 & D5 & OUTPUT_D5 {
+       D5 = vsatwuh(S5_pairi);
+    }
+    :D5 "=vsathb(" S5_pair ")" is imm_21_27=0b1000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b110 & D5 & OUTPUT_D5 {
+       D5 = vsathb(S5_pairi);
+    }
+    :D5 "=vsathb(" S5 ")" is imm_22_27=0b110010 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b00 & imm_5=0 & D5 & OUTPUT_D5 {
+       D5 = vsathb(S5i);
+    }
+    :D5 "=vsathub(" S5 ")" is imm_22_27=0b110010 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b01 & imm_5=0 & D5 & OUTPUT_D5 {
+       D5 = vsathub(S5i);
+    }
+}
+
+# XTYPE/PERM:vector saturate without pack
+with slot: iclass=0b1000  {
+    :D5_pair "=vsathub(" S5_pair ")" is imm_21_27=0b0000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b100 & D5_pair {
+       D5_pair = vsathub(S5_pairi);
+    }
+    :D5_pair "=vsatwuh(" S5_pair ")" is imm_21_27=0b0000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b101 & D5_pair {
+       D5_pair = vsatwuh(S5_pairi);
+    }
+    :D5_pair "=vsatwh(" S5_pair ")" is imm_21_27=0b0000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b110 & D5_pair {
+       D5_pair = vsatwh(S5_pairi);
+    }
+    :D5_pair "=vsathb(" S5_pair ")" is imm_21_27=0b0000000 & S5_pair & S5_pairi & imm_8_13=0 & imm_5_7=0b111 & D5_pair {
+       D5_pair = vsathb(S5_pairi);
+    }
+}
+
+# XTYPE/PERM:vector shuffle
+define pcodeop shuffeb;
+define pcodeop shuffob;
+define pcodeop shuffeh;
+define pcodeop shuffoh;
+
+with slot: iclass=0b1100  {
+    :D5_pair "=shuffeb(" S5_pair "," T5_pair ")" is imm_22_27=0b000100 & imm_21=0 & S5_pair & S5_pairi & imm_13=0 & T5_pair & T5_pairi & imm_6_7=0b01 & imm_5=0 & D5_pair {
+       D5_pair = shuffeb(S5_pairi, T5_pairi);
+    }
+    :D5_pair "=shuffob(" T5_pair "," S5_pair ")" is imm_22_27=0b000100 & imm_21=0 & S5_pair & S5_pairi & imm_13=0 & T5_pair & T5_pairi & imm_6_7=0b10 & imm_5=0 & D5_pair {
+       D5_pair = shuffob(T5_pairi, S5_pairi);
+    }
+    :D5_pair "=shuffeh(" S5_pair "," T5_pair ")" is imm_22_27=0b000100 & imm_21=0 & S5_pair & S5_pairi & imm_13=0 & T5_pair & T5_pairi & imm_6_7=0b11 & imm_5=0 & D5_pair {
+       D5_pair = shuffeh(S5_pairi, T5_pairi);
+    }
+    :D5_pair "=shuffoh(" T5_pair "," S5_pair ")" is imm_22_27=0b000110 & imm_21=0 & S5_pair & S5_pairi & imm_13=0 & T5_pair & T5_pairi & imm_5_7=0b000 & D5_pair {
+       D5_pair = shuffoh(T5_pairi, S5_pairi);
+    }
+}
+
+# XTYPE/PERM:vector splat bytes
+with slot: iclass=0b1000  {
+    :D5_pair "=vsplatb(" S5 ")" is imm_22_27=0b010001 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b10 & imm_5=0 & D5_pair {
+      local lo:8 = zext(S5i:1);
+      D5_pair = lo | (lo << 8) | (lo << 16) | (lo << 24) | (lo << 32) | (lo << 40) | (lo << 48) | (lo << 56);
+    }
+    :D5 "=vsplatb(" S5 ")" is imm_21_27=0b1100010 & S5 & S5i & imm_8_13=0 & imm_5_7=0b111 & D5 & OUTPUT_D5 {
+      local lo:4 = zext(S5i:1);
+      D5 = lo | (lo << 8) | (lo << 16) | (lo << 24);
+    }
+}
+
+# XTYPE/PERM:vector splat halfwords
+with slot: iclass=0b1000  {
+    :D5_pair "=vsplath(" S5 ")" is imm_22_27=0b010001 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b01 & imm_5=0 & D5_pair {
+      local lo:8 = zext(S5i:2);
+      D5_pair = lo | (lo << 16) | (lo << 32) | (lo << 48);
+    }
+}
+
+# XTYPE/PERM:vector splice
+define pcodeop vspliceb;
+with slot: iclass=0b1100  {
+    :D5_pair "=vsplice(" S5_pair "," T5_pair "," imm_5_7u ")" is imm_23_27=0b00001 & imm_21_22=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_5_7u & D5_pair {
+       D5_pair = vspliceb(S5_pairi, T5_pairi, imm_5_7u:4);
+    }
+    :D5_pair "=vsplice(" S5_pair "," T5_pair "," U2_5_6 ")" is imm_21_27=0b0010100 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_7=0 & U2_5_6 & D5_pair {
+       D5_pair = vspliceb(S5_pairi, T5_pairi, U2_5_6);
+    }
+}
+
+# XTYPE/PERM:vector sign extend
+define pcodeop vsextbh;
+define pcodeop vsexthw;
+with slot: iclass=0b1000  {
+    :D5_pair "=vsextbh(" S5 ")" is imm_22_27=0b010000 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b00 & imm_5=0 & D5_pair {
+       D5_pair = vsextbh(S5i);
+    }
+    :D5_pair "=vsexthw(" S5 ")" is imm_22_27=0b010000 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b10 & imm_5=0 & D5_pair {
+       D5_pair = vsexthw(S5i);
+    }
+}
+
+# XTYPE/PERM:vector truncate
+define pcodeop vtrunohb;
+define pcodeop vtrunehb;
+with slot: iclass=0b1000  {
+    :D5 "=vtrunohb(" S5_pair ")" is imm_21_27=0b1000100 & S5_pair & S5_pairi  & imm_8_13=0 & imm_5_7=0b000 & D5 & OUTPUT_D5 {
+       D5 = vtrunohb(S5_pairi);
+    }
+    :D5 "=vtrunehb(" S5_pair ")" is imm_21_27=0b1000100 & S5_pair & S5_pairi  & imm_8_13=0 & imm_5_7=0b010 & D5 & OUTPUT_D5 {
+       D5 = vtrunehb(S5_pairi);
+    }
+}
+
+define pcodeop vtrunewh;
+define pcodeop vtrunowh;
+with slot: iclass=0b1100  {
+    :D5_pair "=vtrunewh(" S5_pair "," T5_pair ")" is imm_22_27=0b000110 & imm_21=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_5_7=0b010 & D5_pair {
+       D5_pair = vtrunewh(S5_pairi, T5_pairi);
+    }
+    :D5_pair "=vtrunehb(" S5_pair "," T5_pair ")" is imm_22_27=0b000110 & imm_21=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_5_7=0b011 & D5_pair {
+       D5_pair = vtrunehb(S5_pairi, T5_pairi);
+    }
+    :D5_pair "=vtrunowh(" S5_pair "," T5_pair ")" is imm_22_27=0b000110 & imm_21=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_5_7=0b100 & D5_pair {
+       D5_pair = vtrunowh(S5_pairi, T5_pairi);
+    }
+    :D5_pair "=vtrunohb(" S5_pair "," T5_pair ")" is imm_22_27=0b000110 & imm_21=0 & S5_pair & S5_pairi  & imm_13=0 & T5_pair & T5_pairi & imm_5_7=0b101 & D5_pair {
+       D5_pair = vtrunohb(S5_pairi, T5_pairi);
+    }
+}
+
+# XTYPE/PERM:vec zext
+define pcodeop vzxtbh;
+define pcodeop vzxthw;
+
+with slot: iclass=0b1000  {
+    :D5_pair "=vzxtbh(" S5 ")" is imm_22_27=0b010000 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b01 & imm_5=0 & D5_pair {
+       D5_pair = vzxtbh(S5i);
+    }
+    :D5_pair "=vzxthw(" S5 ")" is imm_22_27=0b010000 & imm_21=0 & S5 & S5i & imm_8_13=0 & imm_6_7=0b11 & imm_5=0 & D5_pair {
+       D5_pair = vzxthw(S5i);
+    }
+}
