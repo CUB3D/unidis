@@ -1,10 +1,10 @@
-use std::collections::BTreeMap;
-use std::sync::LazyLock;
-use actix_web::{HttpResponse};
+use actix_web::HttpResponse;
 use actix_web::web::Form;
 use askama::Template;
-use libundis::{UniDis, UnidisArch, ARCHES};
+use libundis::{ARCHES, UniDis, UnidisArch};
 use serde::Deserialize;
+use std::collections::BTreeMap;
+use std::sync::LazyLock;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -24,14 +24,11 @@ pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
 
 const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
 
-pub async fn render_index_page(
-    output: String,
-    input_data: String,
-) -> HttpResponse {
-        let template = IndexTemplate {
+pub async fn render_index_page(output: String, input_data: String) -> HttpResponse {
+    let template = IndexTemplate {
         output,
         arches: ARCH_MAP.keys().cloned().collect(),
-            input_data,
+        input_data,
     }
     .render()
     .expect("Unable to render template");
