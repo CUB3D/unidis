@@ -1,4 +1,4 @@
-name: Build kcal image
+name: Build web image
 
 on:
   push:
