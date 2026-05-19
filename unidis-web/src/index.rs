@@ -10,8 +10,10 @@ use std::sync::LazyLock;
 #[template(path = "index.html")]
 pub struct IndexTemplate {
     output: String,
-    arches: Vec<String>,
+    arches: Vec<(String, bool)>,
     input_data: String,
+    include_bytes: bool,
+    include_address: bool
 }
 
 pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
@@ -24,11 +26,19 @@ pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
 
 const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
 
-pub async fn render_index_page(output: String, input_data: String) -> HttpResponse {
+pub async fn render_index_page(
+    output: String,
+    input_data: String,
+    include_bytes: bool,
+    include_address: bool,
+    selected_arch: String,
+) -> HttpResponse {
     let template = IndexTemplate {
         output,
-        arches: ARCH_MAP.keys().cloned().collect(),
+        arches: ARCH_MAP.keys().cloned().map(|s| (s.clone(), s == selected_arch)).collect(),
         input_data,
+        include_bytes,
+        include_address,
     }
     .render()
     .expect("Unable to render template");
@@ -40,7 +50,7 @@ pub async fn index_head() -> HttpResponse {
 }
 
 pub async fn index_get() -> HttpResponse {
-    render_index_page("".to_string(), "".to_string()).await
+    render_index_page("".to_string(), "".to_string(), true, true, "".to_string()).await
 }
 
 #[derive(Debug, Deserialize)]
@@ -48,6 +58,8 @@ pub struct DisReq {
     input_data: String,
     arch: String,
     base_addr: String,
+    include_bytes: Option<String>,
+    include_addr: Option<String>,
 }
 
 pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
@@ -81,9 +93,13 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
     let mut x = UniDis::new_arch(x, arch).unwrap();
 
     while let Ok(Some(c)) = x.next() {
-        out.push_str(&format!("{:08x}: ", c.address() + base_addr));
-        for b in c.bytes() {
-            out.push_str(&format!("{:02X} ", b));
+        if b.include_addr.is_some() {
+            out.push_str(&format!("{:08x}: ", c.address() + base_addr));
+        }
+        if b.include_bytes.is_some() {
+            for b in c.bytes() {
+                out.push_str(&format!("{:02X} ", b));
+            }
         }
         out.push_str("        ");
         out.push_str(&c.memonic());
@@ -100,5 +116,5 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
         out.push('\n');
     }
 
-    render_index_page(out, b.input_data.clone()).await
+    render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone()).await
 }

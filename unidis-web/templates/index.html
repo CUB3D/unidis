@@ -4,24 +4,6 @@
 
 <div class="container-md">
 
-<!--  <form action="/" method="post" class="form-group">-->
-<!--    <label for="base_addr">Base address</label>-->
-<!--    <input type="text" class="form-control" id="base_addr" name="base_addr" value="0x00000000">-->
-<!--    <label for="input_data">Bytes to disassemble:</label>-->
-<!--    <textarea id="input_data" type="text" name="input_data">{{input_data}}</textarea>-->
-<!--    <button type="submit" class="btn btn-primary">Submit</button>-->
-<!--    <select name="arch">-->
-<!--      {% for x in arches %}-->
-<!--        <option value="{{ x }}">{{ x }}</option>-->
-<!--      {% endfor %}-->
-<!--    </select>-->
-<!--  </form>-->
-
-<!--  <label for="res">Dissassembly</label>-->
-<!--  <textarea id="res" readonly class="w-75">{{output}}</textarea>-->
-
-
-
   <form action="/" method="post" class="mt-4">
     <div class="row g-3 align-items-end mb-3">
       <div class="col-sm-6">
@@ -31,7 +13,7 @@
       <div class="col-sm-6">
         <label for="arch" class="form-label fw-semibold">Architecture</label>
         <select name="arch" id="arch" class="form-select">
-          {% for x in arches %}<option value="{{ x }}">{{ x }}</option>{% endfor %}
+          {% for (x, sel) in arches %}<option value="{{ x }}" {% if sel %} selected{% endif %}>{{ x }}</option>{% endfor %}
         </select>
       </div>
     </div>
@@ -40,6 +22,17 @@
       <label for="input_data" class="form-label fw-semibold">Bytes to Disassemble</label>
       <textarea id="input_data" name="input_data" rows="6" class="form-control font-monospace" placeholder="e.g. 73 00 00 00 ...">{{input_data}}</textarea>
       <div class="form-text">Enter hex bytes separated by spaces.</div>
+    </div>
+
+    <div class="row g-3 align-items-end mb-3">
+      <div class="col-sm-6">
+        <label for="include_addr" class="form-check-label fw-semibold">Include address</label>
+        <input type="checkbox" class="form-check-input" id="include_addr" name="include_addr" value=""  {% if include_address %} checked {% endif %}>
+      </div>
+      <div class="col-sm-6">
+        <label for="include_bytes" class="form-check-label fw-semibold">Include bytes</label>
+        <input type="checkbox" class="form-check-input" id="include_bytes" name="include_bytes" value="" {% if include_bytes %} checked {% endif %}>
+      </div>
     </div>
 
     <button type="submit" class="btn btn-primary px-4">
