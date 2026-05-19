@@ -5,8 +5,12 @@ use libsla::{
     Address, GhidraSleigh, InstructionBytes, NativeDisassembly, PcodeDisassembly, Sleigh,
     VarnodeData,
 };
+use crate::arch::Arch;
+use crate::dyn_arch::DynArch;
 
 pub mod opinion;
+mod arch;
+mod dyn_arch;
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum UnidisArch {
@@ -15,39 +19,6 @@ pub enum UnidisArch {
     Hexagon,
     Riscv,
     AArch64,
-}
-
-pub trait Arch {
-    const PSPEC: &'static str;
-    const SLA: &'static [u8];
-    const OPINION: &'static str;
-    const ARCH: UnidisArch;
-}
-
-pub trait DynArch {
-    fn get_pspec(&self) -> &'static str;
-    fn get_sla(&self) -> &'static [u8];
-    fn get_opinion(&self) -> &'static str;
-    fn get_arch(&self) -> UnidisArch;
-}
-
-impl<T: Arch> DynArch for T {
-
-    fn get_pspec(&self) -> &'static str {
-        Self::PSPEC
-    }
-
-    fn get_sla(&self) -> &'static [u8] {
-        Self::SLA
-    }
-
-    fn get_opinion(&self) -> &'static str {
-        Self::OPINION
-    }
-
-    fn get_arch(&self) -> UnidisArch {
-        Self::ARCH
-    }
 }
 
 pub struct ArchX86;
@@ -83,10 +54,26 @@ impl Arch for ArchRiscV {
     const ARCH: UnidisArch = UnidisArch::Riscv;
 }
 
-pub struct ArchAArch64;
-impl Arch for ArchAArch64 {
+pub struct ArchAArch64Le;
+impl Arch for ArchAArch64Le {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64.sla");
+    const OPINION: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.opinion");
+    const ARCH: UnidisArch = UnidisArch::AArch64;
+}
+
+pub struct ArchAArch64Be;
+impl Arch for ArchAArch64Be {
+    const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64BE.sla");
+    const OPINION: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.opinion");
+    const ARCH: UnidisArch = UnidisArch::AArch64;
+}
+
+pub struct ArchAArch64Apple;
+impl Arch for ArchAArch64Apple {
+    const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64_AppleSilicon.sla");
     const OPINION: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.opinion");
     const ARCH: UnidisArch = UnidisArch::AArch64;
 }
@@ -96,7 +83,9 @@ pub const ARCHES: &[&dyn DynArch] = &[
     &ArchArmV8,
     &ArchHexagon,
     &ArchRiscV,
-    &ArchAArch64,
+    &ArchAArch64Le,
+    &ArchAArch64Be,
+    &ArchAArch64Apple,
 ];
 
 pub struct UniDisInstruction {
@@ -170,7 +159,7 @@ impl UniDis {
             UnidisArch::Arm => UniDis::new::<ArchArmV8>(d)?,
             UnidisArch::Hexagon => UniDis::new::<ArchHexagon>(d)?,
             UnidisArch::Riscv => UniDis::new::<ArchRiscV>(d)?,
-            UnidisArch::AArch64 => UniDis::new::<ArchAArch64>(d)?,
+            UnidisArch::AArch64 => UniDis::new::<ArchAArch64Le>(d)?,
         };
         Ok(x)
     }
@@ -223,11 +212,6 @@ impl UniDis {
         self.current_pos.offset += i.res.origin.size as u64;
         Ok(Some(i))
     }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn add(a: i32, b: i32) -> i32 {
-    a + b
 }
 
 #[cfg(test)]
