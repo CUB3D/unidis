@@ -30,13 +30,40 @@ impl Arch for ArchX86 {
     const ARCH_ID: &'static str = "X86_64::LE::default";
 }
 
-pub struct ArchArmV8;
-impl Arch for ArchArmV8 {
+pub struct ArchArmV8Le;
+impl Arch for ArchArmV8Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8_le.sla");
     const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
     const ARCH: UnidisArch = UnidisArch::Arm;
     const ARCH_ID: &'static str = "ARM::LE::V8";
+}
+
+pub struct ArchArmV8Be;
+impl Arch for ArchArmV8Be {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V8";
+}
+
+pub struct ArchArmV7Le;
+impl Arch for ArchArmV7Le {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM7_le.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V7";
+}
+
+pub struct ArchArmV7Be;
+impl Arch for ArchArmV7Be {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM7_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V7";
 }
 
 
@@ -49,13 +76,31 @@ impl Arch for ArchHexagon {
     const ARCH_ID: &'static str = "QDSP6::LE::default";
 }
 
-pub struct ArchRiscV;
-impl Arch for ArchRiscV {
+pub struct ArchRiscV64;
+impl Arch for ArchRiscV64 {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV64.pspec");
     const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/riscv.lp64d.sla");
     const OPINION: &'static str = include_str!("../data/RISCV/data/languages/riscv.opinion");
     const ARCH: UnidisArch = UnidisArch::Riscv;
-    const ARCH_ID: &'static str = "RISCV::LE::default";
+    const ARCH_ID: &'static str = "RISCV::64::LE::default";
+}
+
+pub struct ArchRiscV32;
+impl Arch for ArchRiscV32 {
+    const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV32.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/riscv.ilp32d.sla");
+    const OPINION: &'static str = include_str!("../data/RISCV/data/languages/riscv.opinion");
+    const ARCH: UnidisArch = UnidisArch::Riscv;
+    const ARCH_ID: &'static str = "RISCV::32::LE::default";
+}
+
+pub struct ArchRiscV64Andestar;
+impl Arch for ArchRiscV64Andestar {
+    const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV64.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/andestar_v5.sla");
+    const OPINION: &'static str = include_str!("../data/RISCV/data/languages/riscv.opinion");
+    const ARCH: UnidisArch = UnidisArch::Riscv;
+    const ARCH_ID: &'static str = "RISCV::64::LE::Andestar";
 }
 
 pub struct ArchAArch64Le;
@@ -87,9 +132,14 @@ impl Arch for ArchAArch64Apple {
 
 pub const ARCHES: &[&dyn DynArch] = &[
     &ArchX86,
-    &ArchArmV8,
+    &ArchArmV8Le,
+    &ArchArmV8Be,
+    &ArchArmV7Le,
+    &ArchArmV7Be,
     &ArchHexagon,
-    &ArchRiscV,
+    &ArchRiscV64,
+    &ArchRiscV32,
+    &ArchRiscV64Andestar,
     &ArchAArch64Le,
     &ArchAArch64Be,
     &ArchAArch64Apple,
@@ -163,9 +213,9 @@ impl UniDis {
     pub fn new_arch(d: Vec<u8>, arc: UnidisArch) -> anyhow::Result<Self> {
         let x = match arc {
             UnidisArch::X86_64 => UniDis::new::<ArchX86>(d)?,
-            UnidisArch::Arm => UniDis::new::<ArchArmV8>(d)?,
+            UnidisArch::Arm => UniDis::new::<ArchArmV8Le>(d)?,
             UnidisArch::Hexagon => UniDis::new::<ArchHexagon>(d)?,
-            UnidisArch::Riscv => UniDis::new::<ArchRiscV>(d)?,
+            UnidisArch::Riscv => UniDis::new::<ArchRiscV64>(d)?,
             UnidisArch::AArch64 => UniDis::new::<ArchAArch64Le>(d)?,
         };
         Ok(x)

@@ -260,7 +260,6 @@ dependencies = [
  "anyhow",
  "clap",
  "libsla",
- "link-cplusplus",
  "xmltree",
 ]
 
