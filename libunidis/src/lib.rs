@@ -66,6 +66,24 @@ impl Arch for ArchArmV7Be {
     const ARCH_ID: &'static str = "ARM::BE::V7";
 }
 
+pub struct ArchArmV6Le;
+impl Arch for ArchArmV6Le {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM6_le.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V6";
+}
+
+pub struct ArchArmV6Be;
+impl Arch for ArchArmV6Be {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM6_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V6";
+}
+
 
 pub struct ArchHexagon;
 impl Arch for ArchHexagon {
@@ -136,6 +154,8 @@ pub const ARCHES: &[&dyn DynArch] = &[
     &ArchArmV8Be,
     &ArchArmV7Le,
     &ArchArmV7Be,
+    &ArchArmV6Le,
+    &ArchArmV6Be,
     &ArchHexagon,
     &ArchRiscV64,
     &ArchRiscV32,

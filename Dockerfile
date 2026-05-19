@@ -2,7 +2,7 @@ FROM rust:latest AS build
 
 WORKDIR /home/code
 
-RUN #apt-get update -y && apt-get install -y musl-gcc
+RUN apt-get update -y && apt-get install -y cmake build-essential
 
 ADD rust-toolchain.toml .
 ADD ./unidis-web/templates ./unidis-web/templates
