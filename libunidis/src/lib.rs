@@ -48,6 +48,24 @@ impl Arch for ArchArmV8Be {
     const ARCH_ID: &'static str = "ARM::BE::V8";
 }
 
+pub struct ArchArmV8mBe;
+impl Arch for ArchArmV8mBe {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8m_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V8m";
+}
+
+pub struct ArchArmV8mLe;
+impl Arch for ArchArmV8mLe {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8m_le.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V8m";
+}
+
 pub struct ArchArmV7Le;
 impl Arch for ArchArmV7Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -84,6 +102,59 @@ impl Arch for ArchArmV6Be {
     const ARCH_ID: &'static str = "ARM::BE::V6";
 }
 
+pub struct ArchArmV5Le;
+impl Arch for ArchArmV5Le {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5_le.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V5";
+}
+
+pub struct ArchArmV5Be;
+impl Arch for ArchArmV5Be {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V5";
+}
+
+pub struct ArchArmV5tLe;
+impl Arch for ArchArmV5tLe {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5t_le.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V5t";
+}
+
+pub struct ArchArmV5tBe;
+impl Arch for ArchArmV5tBe {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5t_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V5t";
+}
+
+pub struct ArchArmV4Le;
+impl Arch for ArchArmV4Le {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM4_le.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V4";
+}
+
+pub struct ArchArmV4Be;
+impl Arch for ArchArmV4Be {
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM4_be.sla");
+    const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
+    const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::BE::V4";
+}
 
 pub struct ArchHexagon;
 impl Arch for ArchHexagon {
@@ -150,12 +221,20 @@ impl Arch for ArchAArch64Apple {
 
 pub const ARCHES: &[&dyn DynArch] = &[
     &ArchX86,
+    &ArchArmV8mLe,
+    &ArchArmV8mBe,
     &ArchArmV8Le,
     &ArchArmV8Be,
     &ArchArmV7Le,
     &ArchArmV7Be,
     &ArchArmV6Le,
     &ArchArmV6Be,
+    &ArchArmV5Le,
+    &ArchArmV5Be,
+    &ArchArmV5tLe,
+    &ArchArmV5tBe,
+    &ArchArmV4Le,
+    &ArchArmV4Be,
     &ArchHexagon,
     &ArchRiscV64,
     &ArchRiscV32,
