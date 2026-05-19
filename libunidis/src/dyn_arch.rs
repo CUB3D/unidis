@@ -6,6 +6,8 @@ pub trait DynArch {
     fn get_sla(&self) -> &'static [u8];
     fn get_opinion(&self) -> &'static str;
     fn get_arch(&self) -> UnidisArch;
+
+    fn get_arch_id(&self) -> &'static str;
 }
 
 impl<T: Arch> DynArch for T {
@@ -24,5 +26,9 @@ impl<T: Arch> DynArch for T {
 
     fn get_arch(&self) -> UnidisArch {
         Self::ARCH
+    }
+
+    fn get_arch_id(&self) -> &'static str {
+        Self::ARCH_ID
     }
 }

@@ -13,6 +13,7 @@
       <div class="col-sm-6">
         <label for="arch" class="form-label fw-semibold">Architecture</label>
         <select name="arch" id="arch" class="form-select">
+          <option value="Guess for me">Guess for me</option>
           {% for (x, sel) in arches %}<option value="{{ x }}" {% if sel %} selected{% endif %}>{{ x }}</option>{% endfor %}
         </select>
       </div>

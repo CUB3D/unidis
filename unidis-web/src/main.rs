@@ -20,10 +20,9 @@ async fn main() -> anyhow::Result<()> {
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
         )
         .finish()
-        // .with(sentry_layer)
         .init();
 
-    let host = "0.0.0.0:8080";
+    let host = std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
 
     if dev_mode {
         tracing::error!("RUNNING IN DEV MODE");
@@ -31,7 +30,6 @@ async fn main() -> anyhow::Result<()> {
 
     info!("starting HTTP server at {host}");
 
-    // srv is server controller type, `dev::Server`
     HttpServer::new(move || {
         App::new()
             // enable logger

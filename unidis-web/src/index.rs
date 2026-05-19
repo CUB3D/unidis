@@ -19,7 +19,7 @@ pub struct IndexTemplate {
 pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
     let mut o = BTreeMap::new();
     for a in ARCHES {
-        o.insert(format!("{:?}", a.get_arch()), a.get_arch());
+        o.insert(a.get_arch_id().to_string(), a.get_arch());
     }
     o
 }
@@ -62,6 +62,25 @@ pub struct DisReq {
     include_addr: Option<String>,
 }
 
+/// Guess the architecture of the input bytes
+/// This will attempt disassembly with all the known architectures, picking the one that successfully disassembles the largest number of bytes
+pub fn guess_arch(x: &[u8]) -> UnidisArch {
+    let mut res = (0, UnidisArch::Arm);
+    for a in ARCH_MAP.values() {
+        let mut dis = UniDis::new_arch(x.to_vec(), *a).unwrap();
+
+        let mut c = 0;
+        while let Ok(Some(i)) = dis.next() {
+            c += i.bytes.len();
+        }
+        if c > res.0 {
+            res = (c, *a);
+        }
+    }
+
+    res.1
+}
+
 pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
     tracing::info!("Incoming request: {:#?}", b);
     let x = match hex::decode(b.input_data.replace(" ", "")) {
@@ -85,9 +104,13 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
 
     let mut out = String::new();
 
-    let arch = match ARCH_MAP.get(&b.arch) {
-        Some(v) => *v,
-        None => return HttpResponse::BadRequest().body("arch not found"),
+    let arch = if b.arch == "Guess for me" {
+      guess_arch(&x)
+    } else {
+        match ARCH_MAP.get(&b.arch) {
+            Some(v) => *v,
+            None => return HttpResponse::BadRequest().body("arch not found"),
+        }
     };
 
     let mut x = UniDis::new_arch(x, arch).unwrap();

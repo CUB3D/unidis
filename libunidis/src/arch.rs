@@ -5,4 +5,5 @@ pub trait Arch {
     const SLA: &'static [u8];
     const OPINION: &'static str;
     const ARCH: UnidisArch;
+    const ARCH_ID: &'static str;
 }

@@ -27,6 +27,7 @@ impl Arch for ArchX86 {
     const SLA: &'static [u8] = include_bytes!("../data/x86-64.sla");
     const OPINION: &'static str = include_str!("../data/x86.opinion");
     const ARCH: UnidisArch = UnidisArch::X86_64;
+    const ARCH_ID: &'static str = "X86_64::LE::default";
 }
 
 pub struct ArchArmV8;
@@ -35,6 +36,7 @@ impl Arch for ArchArmV8 {
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8_le.sla");
     const OPINION: &'static str = include_str!("../data/ARM/data/languages/ARM.opinion");
     const ARCH: UnidisArch = UnidisArch::Arm;
+    const ARCH_ID: &'static str = "ARM::LE::V8";
 }
 
 
@@ -44,6 +46,7 @@ impl Arch for ArchHexagon {
     const SLA: &'static [u8] = include_bytes!("../data/Hexagon/data/languages/hexagon.sla");
     const OPINION: &'static str = include_str!("../data/Hexagon/data/languages/hexagon.opinion");
     const ARCH: UnidisArch = UnidisArch::Hexagon;
+    const ARCH_ID: &'static str = "QDSP6::LE::default";
 }
 
 pub struct ArchRiscV;
@@ -52,6 +55,7 @@ impl Arch for ArchRiscV {
     const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/riscv.lp64d.sla");
     const OPINION: &'static str = include_str!("../data/RISCV/data/languages/riscv.opinion");
     const ARCH: UnidisArch = UnidisArch::Riscv;
+    const ARCH_ID: &'static str = "RISCV::LE::default";
 }
 
 pub struct ArchAArch64Le;
@@ -60,6 +64,7 @@ impl Arch for ArchAArch64Le {
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64.sla");
     const OPINION: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.opinion");
     const ARCH: UnidisArch = UnidisArch::AArch64;
+    const ARCH_ID: &'static str = "AArch64::LE::default";
 }
 
 pub struct ArchAArch64Be;
@@ -68,6 +73,7 @@ impl Arch for ArchAArch64Be {
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64BE.sla");
     const OPINION: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.opinion");
     const ARCH: UnidisArch = UnidisArch::AArch64;
+    const ARCH_ID: &'static str = "AArch64::BE::default";
 }
 
 pub struct ArchAArch64Apple;
@@ -76,6 +82,7 @@ impl Arch for ArchAArch64Apple {
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64_AppleSilicon.sla");
     const OPINION: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.opinion");
     const ARCH: UnidisArch = UnidisArch::AArch64;
+    const ARCH_ID: &'static str = "AArch64::LE::Apple-Silicon";
 }
 
 pub const ARCHES: &[&dyn DynArch] = &[
