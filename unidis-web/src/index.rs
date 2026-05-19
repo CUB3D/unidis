@@ -150,7 +150,25 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
         render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Disassembly Output".to_string()).await
     } else {
         use keystone_engine::*;
-        let asm = match Keystone::new(Arch::X86, Mode::MODE_64) {
+
+        let (arch, mode) = if b.arch == "Guess for me" {
+            return render_index_page("I can't guess what you want to assemble".to_string(), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
+        } else {
+            match ARCH_MAP.get(&b.arch) {
+                Some(v) => match v {
+                    UnidisArch::X86_64 => (Arch::X86, Mode::MODE_64),
+                    UnidisArch::Arm => (Arch::ARM, Mode::V8),
+                    UnidisArch::AArch64 => (Arch::ARM64, Mode::LITTLE_ENDIAN),
+                    UnidisArch::Hexagon => (Arch::HEXAGON, Mode::LITTLE_ENDIAN),
+                    UnidisArch::Riscv => {
+                        return render_index_page("Unsupported architecture".to_string(), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
+                    },
+                },
+                None => return HttpResponse::BadRequest().body("arch not found"),
+            }
+        };
+
+        let asm = match Keystone::new(arch, mode) {
             Ok(v) => v,
             Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
         };
