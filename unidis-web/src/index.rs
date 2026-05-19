@@ -13,7 +13,8 @@ pub struct IndexTemplate {
     arches: Vec<(String, bool)>,
     input_data: String,
     include_bytes: bool,
-    include_address: bool
+    include_address: bool,
+    output_title: String,
 }
 
 pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
@@ -32,6 +33,7 @@ pub async fn render_index_page(
     include_bytes: bool,
     include_address: bool,
     selected_arch: String,
+    output_title: String,
 ) -> HttpResponse {
     let template = IndexTemplate {
         output,
@@ -39,6 +41,7 @@ pub async fn render_index_page(
         input_data,
         include_bytes,
         include_address,
+        output_title,
     }
     .render()
     .expect("Unable to render template");
@@ -50,11 +53,13 @@ pub async fn index_head() -> HttpResponse {
 }
 
 pub async fn index_get() -> HttpResponse {
-    render_index_page("".to_string(), "".to_string(), true, true, "".to_string()).await
+    render_index_page("".to_string(), "".to_string(), true, true, "".to_string(), "Output".to_string()).await
 }
 
 #[derive(Debug, Deserialize)]
 pub struct DisReq {
+    mode: String,
+
     input_data: String,
     arch: String,
     base_addr: String,
@@ -83,15 +88,8 @@ pub fn guess_arch(x: &[u8]) -> UnidisArch {
 
 pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
     tracing::info!("Incoming request: {:#?}", b);
-    let x = match hex::decode(b.input_data.replace(" ", "")) {
-        Ok(v) => v,
-        Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
-    };
 
-    if x.len() > 128 {
-        return HttpResponse::BadRequest().body("Input data is too long");
-    }
-
+    // Parse base addr
     let base_addr = if b.base_addr.starts_with("0x") {
         u64::from_str_radix(&b.base_addr[2..], 16)
     } else {
@@ -102,42 +100,74 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
         Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
     };
 
-    let mut out = String::new();
+    if b.mode == "DISASSEMBLE" {
+        let x = match hex::decode(b.input_data.replace(" ", "")) {
+            Ok(v) => v,
+            Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
+        };
 
-    let arch = if b.arch == "Guess for me" {
-      guess_arch(&x)
-    } else {
-        match ARCH_MAP.get(&b.arch) {
-            Some(v) => *v,
-            None => return HttpResponse::BadRequest().body("arch not found"),
+        if x.len() > 128 {
+            return HttpResponse::BadRequest().body("Input data is too long");
         }
-    };
 
-    let mut x = UniDis::new_arch(x, arch).unwrap();
+        let mut out = String::new();
 
-    while let Ok(Some(c)) = x.next() {
-        if b.include_addr.is_some() {
-            out.push_str(&format!("{:08x}: ", c.address() + base_addr));
-        }
-        if b.include_bytes.is_some() {
-            for b in c.bytes() {
-                out.push_str(&format!("{:02X} ", b));
+        let arch = if b.arch == "Guess for me" {
+            guess_arch(&x)
+        } else {
+            match ARCH_MAP.get(&b.arch) {
+                Some(v) => *v,
+                None => return HttpResponse::BadRequest().body("arch not found"),
             }
-        }
-        out.push_str("        ");
-        out.push_str(&c.memonic());
-        let mut args = c.args().into_iter().peekable();
-        if args.peek().is_some() {
-            out.push_str("    ");
-        }
-        while let Some(arg) = args.next() {
-            out.push_str(&arg);
+        };
+
+        let mut x = UniDis::new_arch(x, arch).unwrap();
+
+        while let Ok(Some(c)) = x.next() {
+            if b.include_addr.is_some() {
+                out.push_str(&format!("{:08x}: ", c.address() + base_addr));
+            }
+            if b.include_bytes.is_some() {
+                for b in c.bytes() {
+                    out.push_str(&format!("{:02X} ", b));
+                }
+            }
+            out.push_str("        ");
+            out.push_str(&c.memonic());
+            let mut args = c.args().into_iter().peekable();
             if args.peek().is_some() {
-                out.push_str(", ");
+                out.push_str("    ");
             }
+            while let Some(arg) = args.next() {
+                out.push_str(&arg);
+                if args.peek().is_some() {
+                    out.push_str(", ");
+                }
+            }
+            out.push('\n');
         }
-        out.push('\n');
-    }
 
-    render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone()).await
+        render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Disassembly Output".to_string()).await
+    } else {
+        use keystone_engine::*;
+        let asm = match Keystone::new(Arch::X86, Mode::MODE_64) {
+            Ok(v) => v,
+            Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
+        };
+
+        let res = match asm.asm(b.input_data.clone(), base_addr) {
+            Ok(v) => v,
+            Err(e) => {
+                return render_index_page(format!("Failed to assemble: {e:?}"), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
+            },
+        };
+
+        let mut out = String::new();
+        for c in res.bytes {
+            out.push_str(&format!("{:02X} ", c));
+        }
+        let out = out.trim().to_string();
+
+        render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await
+    }
 }

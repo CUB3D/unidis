@@ -20,9 +20,9 @@
     </div>
 
     <div class="mb-3">
-      <label for="input_data" class="form-label fw-semibold">Bytes to Disassemble</label>
-      <textarea id="input_data" name="input_data" rows="6" class="form-control font-monospace" placeholder="e.g. 73 00 00 00 ...">{{input_data}}</textarea>
-      <div class="form-text">Enter hex bytes separated by spaces.</div>
+      <label for="input_data" class="form-label fw-semibold">Input</label>
+      <textarea id="input_data" name="input_data" rows="6" class="form-control font-monospace" placeholder="e.g. 73 00 00 00 ...\n or mov RAX, 0x0">{{input_data}}</textarea>
+      <div class="form-text">Enter hex bytes separated by spaces or assembly.</div>
     </div>
 
     <div class="row g-3 align-items-end mb-3">
@@ -36,18 +36,24 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary px-4">
+    <button type="submit" class="btn btn-primary px-4" name="mode" value="DISASSEMBLE">
       <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="me-1" aria-hidden="true" style="vertical-align: -0.125em;">
         <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14A2.5 2.5 0 0 1 11.5 14v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3z"/>
       </svg>
       Disassemble
+    </button>
+    <button type="submit" class="btn btn-secondary px-4" name="mode" value="ASSEMBLE">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="me-1" aria-hidden="true" style="vertical-align: -0.125em;">
+        <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14A2.5 2.5 0 0 1 11.5 14v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3z"/>
+      </svg>
+      Assemble
     </button>
   </form>
 
   <hr class="my-4">
 
   <div class="mb-3">
-    <label for="res" class="form-label fw-semibold">Disassembly Output</label>
+    <label for="res" class="form-label fw-semibold">{{output_title}}</label>
     <textarea id="res" readonly rows="10" class="form-control font-monospace bg-dark text-success" placeholder="Output will appear here...">{{output}}</textarea>
   </div>
 </div>

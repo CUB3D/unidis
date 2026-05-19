@@ -197,7 +197,7 @@ impl UniDis {
          //println!("{:#?}", native_disassembly);
 
         let bytes = self.data[self.current_pos.offset as usize..]
-            [..native_disassembly.origin.size as usize]
+            [..native_disassembly.origin.size]
             .to_vec();
 
         Ok(UniDisInstruction {
