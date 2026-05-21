@@ -75,7 +75,7 @@ pub fn guess_arch(x: &[u8]) -> UnidisArch {
         let mut dis = UniDis::new_arch(x.to_vec(), *a).unwrap();
 
         let mut c = 0;
-        while let Ok(Some(i)) = dis.next() {
+        while let Ok(Some(i)) = dis.next_instruction() {
             c += i.bytes.len();
         }
         if c > res.0 {
@@ -123,7 +123,7 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
 
         let mut x = UniDis::new_arch(x, arch).unwrap();
 
-        while let Ok(Some(c)) = x.next() {
+        while let Ok(Some(c)) = x.next_instruction() {
             if b.include_addr.is_some() {
                 out.push_str(&format!("{:08x}: ", c.address() + base_addr));
             }
@@ -149,43 +149,53 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
 
         render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Disassembly Output".to_string()).await
     } else {
-        use keystone_engine::*;
-
-        let (arch, mode) = if b.arch == "Guess for me" {
-            return render_index_page("I can't guess what you want to assemble".to_string(), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
-        } else {
-            match ARCH_MAP.get(&b.arch) {
-                Some(v) => match v {
-                    UnidisArch::X86_64 => (Arch::X86, Mode::MODE_64),
-                    UnidisArch::Arm => (Arch::ARM, Mode::V8),
-                    UnidisArch::AArch64 => (Arch::ARM64, Mode::LITTLE_ENDIAN),
-                    UnidisArch::Hexagon => (Arch::HEXAGON, Mode::LITTLE_ENDIAN),
-                    UnidisArch::Riscv => {
-                        return render_index_page("Unsupported architecture".to_string(), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
-                    },
-                },
-                None => return HttpResponse::BadRequest().body("arch not found"),
-            }
-        };
-
-        let asm = match Keystone::new(arch, mode) {
-            Ok(v) => v,
-            Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
-        };
-
-        let res = match asm.asm(b.input_data.clone(), base_addr) {
-            Ok(v) => v,
-            Err(e) => {
-                return render_index_page(format!("Failed to assemble: {e:?}"), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
-            },
-        };
-
-        let mut out = String::new();
-        for c in res.bytes {
-            out.push_str(&format!("{:02X} ", c));
-        }
-        let out = out.trim().to_string();
-
-        render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await
+        assembler_index(b, base_addr).await
     }
+}
+
+#[cfg(not(feature = "assembler"))]
+pub async fn assembler_index(_b: Form<DisReq>, _base_addr: u64) -> HttpResponse {
+    HttpResponse::BadRequest().finish()
+}
+
+#[cfg(feature = "assembler")]
+pub async fn assembler_index(b: Form<DisReq>, base_addr: u64) -> HttpResponse {
+    use keystone_engine::*;
+
+    let (arch, mode) = if b.arch == "Guess for me" {
+        return render_index_page("I can't guess what you want to assemble".to_string(), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
+    } else {
+        match ARCH_MAP.get(&b.arch) {
+            Some(v) => match v {
+                UnidisArch::X86_64 => (Arch::X86, Mode::MODE_64),
+                UnidisArch::Arm => (Arch::ARM, Mode::V8),
+                UnidisArch::AArch64 => (Arch::ARM64, Mode::LITTLE_ENDIAN),
+                UnidisArch::Hexagon => (Arch::HEXAGON, Mode::LITTLE_ENDIAN),
+                UnidisArch::Riscv => {
+                    return render_index_page("Unsupported architecture".to_string(), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
+                },
+            },
+            None => return HttpResponse::BadRequest().body("arch not found"),
+        }
+    };
+
+    let asm = match Keystone::new(arch, mode) {
+        Ok(v) => v,
+        Err(e) => return HttpResponse::BadRequest().body(format!("{:?}", e)),
+    };
+
+    let res = match asm.asm(b.input_data.clone(), base_addr) {
+        Ok(v) => v,
+        Err(e) => {
+            return render_index_page(format!("Failed to assemble: {e:?}"), b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await;
+        },
+    };
+
+    let mut out = String::new();
+    for c in res.bytes {
+        out.push_str(&format!("{:02X} ", c));
+    }
+    let out = out.trim().to_string();
+
+    render_index_page(out, b.input_data.clone(), b.include_bytes.is_some(), b.include_addr.is_some(), b.arch.clone(), "Assembly Output".to_string()).await
 }

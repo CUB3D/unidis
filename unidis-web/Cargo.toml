@@ -13,4 +13,7 @@ askama = "=0.16.0"
 dotenv = "=0.15.0"
 hex = "=0.4.3"
 libunidis = { path = "../libunidis" }
-keystone-engine = { version = "=0.1.0", features = ["build-from-src"] }
+keystone-engine = { version = "=0.1.0", features = ["build-from-src"], optional = true }
+
+[features]
+assembler = ["keystone-engine"]

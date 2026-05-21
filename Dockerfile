@@ -11,7 +11,7 @@ ADD unidis-web/Cargo.toml ./unidis-web/
 ADD ./libunidis ./libunidis
 ADD ./unidis-web/src/ ./unidis-web/src/
 
-RUN cd ./unidis-web && cargo build --release
+RUN cd ./unidis-web && cargo build --release --all-features
 
 FROM rust:latest
 

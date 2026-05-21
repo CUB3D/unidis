@@ -2,19 +2,18 @@ use std::str::FromStr;
 use xmltree::Element;
 use crate::UnidisArch;
 
+#[derive(Default)]
 pub struct Opinions {
 }
 
 impl Opinions {
-    pub fn new() -> Self {
-        Self {}
-    }
-
     pub fn lookup_elf(&self, tgt: u64) -> Option<UnidisArch> {
         for arch in crate::ARCHES {
-            let of = OpinionFile::from_bytes(arch.get_opinion().as_bytes());
-            if of.find_elf(tgt).is_some() {
-                return Some(arch.get_arch());
+            if let Some(opp) = arch.get_opinion() {
+                let of = OpinionFile::from_bytes(opp.as_bytes());
+                if of.find_elf(tgt).is_some() {
+                    return Some(arch.get_arch());
+                }
             }
         }
 
@@ -28,7 +27,7 @@ pub struct OpinionFile {
 
 impl OpinionFile {
     pub fn from_bytes(d: &[u8]) -> Self {
-        let tree = Element::parse(&d[..]);
+        let tree = Element::parse(d);
         Self { constraint: tree.unwrap() }
     }
 
