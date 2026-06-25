@@ -12,7 +12,7 @@ use libundis::{UniDis, UnidisArch};
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
-    /// File to dis
+    /// File to disassemble
     #[arg()]
     pub tgt: PathBuf,
 
@@ -25,10 +25,12 @@ pub struct Args {
 }
 
 pub fn dis_binary(arch: UnidisArch, d: Vec<u8>, address_offset: u64, count_limit: &mut Option<i64>) -> anyhow::Result<()> {
-    let mut dis = UniDis::new_arch(d, arch)?;
+    let dis = UniDis::new_arch(arch)?;
+
+    let mut dis = dis.dissassembler(d)?;
 
     loop {
-        let nx = dis.next();
+        let nx = dis.next_instruction();
 
         // Handle count limit
         if let Some(tgt_cnt) = count_limit {
@@ -126,7 +128,7 @@ fn main() -> anyhow::Result<()> {
         // }
         Object::Elf(elf) => {
             // println!("{}", elf.header.e_machine);
-            let elf_arch = Opinions::new().lookup_elf(elf.header.e_machine as _).unwrap();
+            let elf_arch = Opinions::default().lookup_elf(elf.header.e_machine as _).unwrap();
 
             let arch = args.arch.unwrap_or(elf_arch);
 

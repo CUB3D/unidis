@@ -265,6 +265,7 @@ pub const ARCHES: &[&dyn DynArch] = &[
     &Arch65c02,
 ];
 
+#[derive(Clone)]
 pub struct UniDisInstruction {
     pub res: NativeDisassembly,
     pub pcode: PcodeDisassembly,
@@ -321,51 +322,24 @@ impl UniDisInstruction {
     }
 }
 
-pub struct UniDis {
-    pub sleigh: GhidraSleigh,
-    pub instructions: InstructionBytes,
+pub struct UniDisDissassembler<'a> {
     pub data: Vec<u8>,
-
     pub current_pos: Address,
+    pub parent: &'a UniDis,
+    pub instructions: InstructionBytes,
 }
 
-impl UniDis {
-    pub fn new_arch(d: Vec<u8>, arc: UnidisArch) -> anyhow::Result<Self> {
-        let x = match arc {
-            UnidisArch::X86_64 => UniDis::new::<ArchX86>(d)?,
-            UnidisArch::Arm => UniDis::new::<ArchArmV8Le>(d)?,
-            UnidisArch::Hexagon => UniDis::new::<ArchHexagon>(d)?,
-            UnidisArch::Riscv => UniDis::new::<ArchRiscV64>(d)?,
-            UnidisArch::AArch64 => UniDis::new::<ArchAArch64Le>(d)?,
-            UnidisArch::Arch6502 => UniDis::new::<Arch6502>(d)?,
-        };
-        Ok(x)
-    }
-
-    pub fn new<Ar: Arch>(data: Vec<u8>) -> anyhow::Result<Self> {
-        let sleigh = GhidraSleigh::builder()
-            .processor_spec(Ar::PSPEC)?
-            .build(Ar::SLA)?;
-
-        let address_space = sleigh.default_code_space();
-        let current_pos = Address::new(address_space, 0);
-
-        Ok(Self {
-            sleigh,
-            instructions: InstructionBytes::new(data.clone()),
-            data,
-            current_pos,
-        })
-    }
-
+impl<'a> UniDisDissassembler<'a> {
     pub fn dissassemble(&self) -> anyhow::Result<UniDisInstruction> {
         let native_disassembly = self
+            .parent
             .sleigh
             .disassemble_native(&self.instructions, self.current_pos.clone())?;
         let pcode = self
+            .parent
             .sleigh
             .disassemble_pcode(&self.instructions, self.current_pos.clone())?;
-         //println!("{:#?}", native_disassembly);
+        //println!("{:#?}", native_disassembly);
 
         let bytes = self.data[self.current_pos.offset as usize..]
             [..native_disassembly.origin.size]
@@ -392,6 +366,47 @@ impl UniDis {
     }
 }
 
+pub struct UniDis {
+    pub sleigh: GhidraSleigh,
+}
+
+impl UniDis {
+    pub fn new_arch(arc: UnidisArch) -> anyhow::Result<Self> {
+        let x = match arc {
+            UnidisArch::X86_64 => UniDis::new::<ArchX86>()?,
+            UnidisArch::Arm => UniDis::new::<ArchArmV8Le>()?,
+            UnidisArch::Hexagon => UniDis::new::<ArchHexagon>()?,
+            UnidisArch::Riscv => UniDis::new::<ArchRiscV64>()?,
+            UnidisArch::AArch64 => UniDis::new::<ArchAArch64Le>()?,
+            UnidisArch::Arch6502 => UniDis::new::<Arch6502>()?,
+        };
+        Ok(x)
+    }
+
+    pub fn new<Ar: Arch>() -> anyhow::Result<Self> {
+        let sleigh = GhidraSleigh::builder()
+            .processor_spec(Ar::PSPEC)?
+            .build(Ar::SLA)?;
+
+        Ok(Self {
+            sleigh,
+        })
+    }
+
+    pub fn dissassembler(&self, data: Vec<u8>) -> anyhow::Result<UniDisDissassembler<'_>> {
+        let address_space = self.sleigh.default_code_space();
+        let current_pos = Address::new(address_space, 0);
+
+
+        Ok(UniDisDissassembler {
+            data: data.clone(),
+            current_pos,
+            parent: self,
+            instructions: InstructionBytes::new(data)
+        })
+    }
+}
+
 #[cfg(test)]
 pub mod test {
     use std::error::Error;
@@ -400,11 +415,12 @@ pub mod test {
 
     #[test]
     pub fn test_1() -> Result<(), Box<dyn Error>> {
-        let mut x86 = UniDis::new::<ArchX86>(vec![
+        let mut x86 = UniDis::new::<ArchX86>()?;
+        let mut dis = x86.dissassembler(vec![
             0x89, 0xF0, 0x85, 0xFF, 0x74, 0x09, 0x99, 0xF7, 0xFF, 0x89, 0xF8, 0x89, 0xD7, 0xEB,
             0xF3, 0xC3,
         ])?;
-        while let Some(i) = x86.next_instruction()? {
+        while let Some(i) = dis.next_instruction()? {
             println!("{}", i.to_str());
         }
         Ok(())

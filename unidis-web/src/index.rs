@@ -72,7 +72,8 @@ pub struct DisReq {
 pub fn guess_arch(x: &[u8]) -> UnidisArch {
     let mut res = (0, UnidisArch::Arm);
     for a in ARCH_MAP.values() {
-        let mut dis = UniDis::new_arch(x.to_vec(), *a).unwrap();
+        let dis = UniDis::new_arch(*a).unwrap();
+        let mut dis = dis.dissassembler(x.to_vec()).unwrap();
 
         let mut c = 0;
         while let Ok(Some(i)) = dis.next_instruction() {
@@ -121,7 +122,8 @@ pub async fn index_post(b: Form<DisReq>) -> HttpResponse {
             }
         };
 
-        let mut x = UniDis::new_arch(x, arch).unwrap();
+        let y = UniDis::new_arch(arch).unwrap();
+        let mut x = y.dissassembler(x).unwrap();
 
         while let Ok(Some(c)) = x.next_instruction() {
             if b.include_addr.is_some() {
