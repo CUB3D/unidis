@@ -393,16 +393,23 @@ impl UniDis {
         })
     }
 
-    pub fn dissassembler(&self, data: Vec<u8>) -> anyhow::Result<UniDisDissassembler<'_>> {
+    pub fn dissassembler(&self, data: Vec<u8>, base_address: u64) -> anyhow::Result<UniDisDissassembler<'_>> {
         let address_space = self.sleigh.default_code_space();
-        let current_pos = Address::new(address_space, 0);
+        // We have to provide the *correct* base address here, otherwise instructions that compute a relative addr like a riprel jump
+        //  will return the wrong result as they are given back as raw "const" varnodes
+        // This means we also need to pad the input data to that size...
+        // Maybe we could make this some trick with mmap to not waste so much memory??
+        let current_pos = Address::new(address_space, base_address);
+
+        let mut ndata = Vec::with_capacity(data.len() + base_address as usize);
+        ndata[base_address as usize..].copy_from_slice(data.as_slice());
 
 
         Ok(UniDisDissassembler {
-            data: data.clone(),
+            data: ndata.clone(),
             current_pos,
             parent: self,
-            instructions: InstructionBytes::new(data)
+            instructions: InstructionBytes::new(ndata)
         })
     }
 }
