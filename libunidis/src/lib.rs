@@ -402,6 +402,7 @@ impl UniDis {
         let current_pos = Address::new(address_space, base_address);
 
         let mut ndata = Vec::with_capacity(data.len() + base_address as usize);
+        ndata.resize(data.len() + base_address as usize, 0);
         ndata[base_address as usize..].copy_from_slice(data.as_slice());
 
 
