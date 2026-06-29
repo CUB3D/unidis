@@ -1,4 +1,5 @@
 use crate::arch::Arch;
+use crate::cspec::CompilerSpec;
 use crate::UnidisArch;
 
 pub trait DynArch {
@@ -8,6 +9,11 @@ pub trait DynArch {
     fn get_arch(&self) -> UnidisArch;
 
     fn get_arch_id(&self) -> &'static str;
+    fn get_cspec(&self) -> &'static str;
+
+    fn read_cspec(&self) -> CompilerSpec {
+        CompilerSpec::from_bytes(self.get_cspec().as_bytes())
+    }
 }
 
 impl<T: Arch> DynArch for T {
@@ -31,4 +37,6 @@ impl<T: Arch> DynArch for T {
     fn get_arch_id(&self) -> &'static str {
         Self::ARCH_ID
     }
+
+    fn get_cspec(&self) -> &'static str { Self::CSPEC }
 }

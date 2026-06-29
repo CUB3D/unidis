@@ -11,6 +11,7 @@ use crate::dyn_arch::DynArch;
 pub mod opinion;
 mod arch;
 mod dyn_arch;
+mod cspec;
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum UnidisArch {
@@ -24,9 +25,10 @@ pub enum UnidisArch {
 
 pub struct ArchX86;
 impl Arch for ArchX86 {
-    const PSPEC: &'static str = include_str!("../data/x86-64.pspec");
-    const SLA: &'static [u8] = include_bytes!("../data/x86-64.sla");
-    const OPINION: Option<&'static str> = Some(include_str!("../data/x86.opinion"));
+    const PSPEC: &'static str = include_str!("../data/x86/data/languages/x86-64.pspec");
+    const CSPEC: &'static str = include_str!("../data/x86/data/languages/x86-64-gcc.cspec");
+    const SLA: &'static [u8] = include_bytes!("../data/x86/data/languages/x86-64.sla");
+    const OPINION: Option<&'static str> = Some(include_str!("../data/x86/data/languages/x86.opinion"));
     const ARCH: UnidisArch = UnidisArch::X86_64;
     const ARCH_ID: &'static str = "X86_64::LE::default";
 }
@@ -34,6 +36,7 @@ impl Arch for ArchX86 {
 pub struct ArchArmV8Le;
 impl Arch for ArchArmV8Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -43,6 +46,7 @@ impl Arch for ArchArmV8Le {
 pub struct ArchArmV8Be;
 impl Arch for ArchArmV8Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -52,6 +56,7 @@ impl Arch for ArchArmV8Be {
 pub struct ArchArmV8mBe;
 impl Arch for ArchArmV8mBe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8m_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -61,6 +66,7 @@ impl Arch for ArchArmV8mBe {
 pub struct ArchArmV8mLe;
 impl Arch for ArchArmV8mLe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM8m_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -70,6 +76,7 @@ impl Arch for ArchArmV8mLe {
 pub struct ArchArmV7Le;
 impl Arch for ArchArmV7Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM7_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -79,6 +86,7 @@ impl Arch for ArchArmV7Le {
 pub struct ArchArmV7Be;
 impl Arch for ArchArmV7Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM7_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -88,6 +96,7 @@ impl Arch for ArchArmV7Be {
 pub struct ArchArmV6Le;
 impl Arch for ArchArmV6Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM6_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -97,6 +106,7 @@ impl Arch for ArchArmV6Le {
 pub struct ArchArmV6Be;
 impl Arch for ArchArmV6Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM6_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -106,6 +116,7 @@ impl Arch for ArchArmV6Be {
 pub struct ArchArmV5Le;
 impl Arch for ArchArmV5Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -115,6 +126,7 @@ impl Arch for ArchArmV5Le {
 pub struct ArchArmV5Be;
 impl Arch for ArchArmV5Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -124,6 +136,7 @@ impl Arch for ArchArmV5Be {
 pub struct ArchArmV5tLe;
 impl Arch for ArchArmV5tLe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5t_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -133,6 +146,7 @@ impl Arch for ArchArmV5tLe {
 pub struct ArchArmV5tBe;
 impl Arch for ArchArmV5tBe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5t_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -142,6 +156,7 @@ impl Arch for ArchArmV5tBe {
 pub struct ArchArmV4Le;
 impl Arch for ArchArmV4Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM4_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -151,6 +166,7 @@ impl Arch for ArchArmV4Le {
 pub struct ArchArmV4Be;
 impl Arch for ArchArmV4Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM4_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
     const ARCH: UnidisArch = UnidisArch::Arm;
@@ -160,6 +176,7 @@ impl Arch for ArchArmV4Be {
 pub struct ArchHexagon;
 impl Arch for ArchHexagon {
     const PSPEC: &'static str = include_str!("../data/Hexagon/data/languages/hexagon.pspec");
+    const CSPEC: &'static str = include_str!("../data/Hexagon/data/languages/hexagon.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/Hexagon/data/languages/hexagon.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/Hexagon/data/languages/hexagon.opinion"));
     const ARCH: UnidisArch = UnidisArch::Hexagon;
@@ -169,6 +186,7 @@ impl Arch for ArchHexagon {
 pub struct ArchRiscV64;
 impl Arch for ArchRiscV64 {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV64.pspec");
+    const CSPEC: &'static str = include_str!("../data/RISCV/data/languages/riscv64.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/riscv.lp64d.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/RISCV/data/languages/riscv.opinion"));
     const ARCH: UnidisArch = UnidisArch::Riscv;
@@ -178,6 +196,7 @@ impl Arch for ArchRiscV64 {
 pub struct ArchRiscV32;
 impl Arch for ArchRiscV32 {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV32.pspec");
+    const CSPEC: &'static str = include_str!("../data/RISCV/data/languages/riscv32.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/riscv.ilp32d.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/RISCV/data/languages/riscv.opinion"));
     const ARCH: UnidisArch = UnidisArch::Riscv;
@@ -187,6 +206,7 @@ impl Arch for ArchRiscV32 {
 pub struct ArchRiscV64Andestar;
 impl Arch for ArchRiscV64Andestar {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV64.pspec");
+    const CSPEC: &'static str = include_str!("../data/RISCV/data/languages/riscv64.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/RISCV/data/languages/andestar_v5.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/RISCV/data/languages/riscv.opinion"));
     const ARCH: UnidisArch = UnidisArch::Riscv;
@@ -196,6 +216,7 @@ impl Arch for ArchRiscV64Andestar {
 pub struct ArchAArch64Le;
 impl Arch for ArchAArch64Le {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
+    const CSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/AARCH64/data/languages/AARCH64.opinion"));
     const ARCH: UnidisArch = UnidisArch::AArch64;
@@ -205,6 +226,7 @@ impl Arch for ArchAArch64Le {
 pub struct ArchAArch64Be;
 impl Arch for ArchAArch64Be {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
+    const CSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64BE.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/AARCH64/data/languages/AARCH64.opinion"));
     const ARCH: UnidisArch = UnidisArch::AArch64;
@@ -214,6 +236,7 @@ impl Arch for ArchAArch64Be {
 pub struct ArchAArch64Apple;
 impl Arch for ArchAArch64Apple {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
+    const CSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/AARCH64/data/languages/AARCH64_AppleSilicon.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/AARCH64/data/languages/AARCH64.opinion"));
     const ARCH: UnidisArch = UnidisArch::AArch64;
@@ -223,6 +246,7 @@ impl Arch for ArchAArch64Apple {
 pub struct Arch6502;
 impl Arch for Arch6502 {
     const PSPEC: &'static str = include_str!("../data/6502/data/languages/6502.pspec");
+    const CSPEC: &'static str = include_str!("../data/6502/data/languages/6502.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/6502/data/languages/6502.sla");
     const OPINION: Option<&'static str> = None;
     const ARCH: UnidisArch = UnidisArch::Arch6502;
@@ -232,6 +256,7 @@ impl Arch for Arch6502 {
 pub struct Arch65c02;
 impl Arch for Arch65c02 {
     const PSPEC: &'static str = include_str!("../data/6502/data/languages/6502.pspec");
+    const CSPEC: &'static str = include_str!("../data/6502/data/languages/6502.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/6502/data/languages/65c02.sla");
     const OPINION: Option<&'static str> = None;
     const ARCH: UnidisArch = UnidisArch::Arch6502;
