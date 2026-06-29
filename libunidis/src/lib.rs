@@ -11,7 +11,7 @@ use crate::dyn_arch::DynArch;
 pub mod opinion;
 mod arch;
 mod dyn_arch;
-mod cspec;
+pub mod cspec;
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum UnidisArch {
@@ -23,6 +23,7 @@ pub enum UnidisArch {
     Arch6502,
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchX86;
 impl Arch for ArchX86 {
     const PSPEC: &'static str = include_str!("../data/x86/data/languages/x86-64.pspec");
@@ -33,6 +34,7 @@ impl Arch for ArchX86 {
     const ARCH_ID: &'static str = "X86_64::LE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV8Le;
 impl Arch for ArchArmV8Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -43,6 +45,7 @@ impl Arch for ArchArmV8Le {
     const ARCH_ID: &'static str = "ARM::LE::V8";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV8Be;
 impl Arch for ArchArmV8Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -53,6 +56,7 @@ impl Arch for ArchArmV8Be {
     const ARCH_ID: &'static str = "ARM::BE::V8";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV8mBe;
 impl Arch for ArchArmV8mBe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -63,6 +67,7 @@ impl Arch for ArchArmV8mBe {
     const ARCH_ID: &'static str = "ARM::BE::V8m";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV8mLe;
 impl Arch for ArchArmV8mLe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -73,6 +78,7 @@ impl Arch for ArchArmV8mLe {
     const ARCH_ID: &'static str = "ARM::LE::V8m";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV7Le;
 impl Arch for ArchArmV7Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -83,6 +89,7 @@ impl Arch for ArchArmV7Le {
     const ARCH_ID: &'static str = "ARM::LE::V7";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV7Be;
 impl Arch for ArchArmV7Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -93,6 +100,7 @@ impl Arch for ArchArmV7Be {
     const ARCH_ID: &'static str = "ARM::BE::V7";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV6Le;
 impl Arch for ArchArmV6Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -103,6 +111,7 @@ impl Arch for ArchArmV6Le {
     const ARCH_ID: &'static str = "ARM::LE::V6";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV6Be;
 impl Arch for ArchArmV6Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -113,6 +122,7 @@ impl Arch for ArchArmV6Be {
     const ARCH_ID: &'static str = "ARM::BE::V6";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV5Le;
 impl Arch for ArchArmV5Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -123,6 +133,7 @@ impl Arch for ArchArmV5Le {
     const ARCH_ID: &'static str = "ARM::LE::V5";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV5Be;
 impl Arch for ArchArmV5Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -133,6 +144,7 @@ impl Arch for ArchArmV5Be {
     const ARCH_ID: &'static str = "ARM::BE::V5";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV5tLe;
 impl Arch for ArchArmV5tLe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -143,6 +155,7 @@ impl Arch for ArchArmV5tLe {
     const ARCH_ID: &'static str = "ARM::LE::V5t";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV5tBe;
 impl Arch for ArchArmV5tBe {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -153,6 +166,7 @@ impl Arch for ArchArmV5tBe {
     const ARCH_ID: &'static str = "ARM::BE::V5t";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV4Le;
 impl Arch for ArchArmV4Le {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -163,6 +177,7 @@ impl Arch for ArchArmV4Le {
     const ARCH_ID: &'static str = "ARM::LE::V4";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchArmV4Be;
 impl Arch for ArchArmV4Be {
     const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
@@ -173,6 +188,7 @@ impl Arch for ArchArmV4Be {
     const ARCH_ID: &'static str = "ARM::BE::V4";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchHexagon;
 impl Arch for ArchHexagon {
     const PSPEC: &'static str = include_str!("../data/Hexagon/data/languages/hexagon.pspec");
@@ -183,6 +199,7 @@ impl Arch for ArchHexagon {
     const ARCH_ID: &'static str = "QDSP6::LE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchRiscV64;
 impl Arch for ArchRiscV64 {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV64.pspec");
@@ -193,6 +210,7 @@ impl Arch for ArchRiscV64 {
     const ARCH_ID: &'static str = "RISCV::64::LE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchRiscV32;
 impl Arch for ArchRiscV32 {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV32.pspec");
@@ -203,6 +221,7 @@ impl Arch for ArchRiscV32 {
     const ARCH_ID: &'static str = "RISCV::32::LE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchRiscV64Andestar;
 impl Arch for ArchRiscV64Andestar {
     const PSPEC: &'static str = include_str!("../data/RISCV/data/languages/RV64.pspec");
@@ -213,6 +232,7 @@ impl Arch for ArchRiscV64Andestar {
     const ARCH_ID: &'static str = "RISCV::64::LE::Andestar";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchAArch64Le;
 impl Arch for ArchAArch64Le {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
@@ -223,6 +243,7 @@ impl Arch for ArchAArch64Le {
     const ARCH_ID: &'static str = "AArch64::LE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchAArch64Be;
 impl Arch for ArchAArch64Be {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
@@ -233,6 +254,7 @@ impl Arch for ArchAArch64Be {
     const ARCH_ID: &'static str = "AArch64::BE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct ArchAArch64Apple;
 impl Arch for ArchAArch64Apple {
     const PSPEC: &'static str = include_str!("../data/AARCH64/data/languages/AARCH64.pspec");
@@ -243,6 +265,7 @@ impl Arch for ArchAArch64Apple {
     const ARCH_ID: &'static str = "AArch64::LE::Apple-Silicon";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct Arch6502;
 impl Arch for Arch6502 {
     const PSPEC: &'static str = include_str!("../data/6502/data/languages/6502.pspec");
@@ -253,6 +276,7 @@ impl Arch for Arch6502 {
     const ARCH_ID: &'static str = "6502::LE::default";
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct Arch65c02;
 impl Arch for Arch65c02 {
     const PSPEC: &'static str = include_str!("../data/6502/data/languages/6502.pspec");
