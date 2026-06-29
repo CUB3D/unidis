@@ -27,7 +27,7 @@ pub struct Args {
 pub fn dis_binary(arch: UnidisArch, d: Vec<u8>, address_offset: u64, count_limit: &mut Option<i64>) -> anyhow::Result<()> {
     let dis = UniDis::new_arch(arch)?;
 
-    let mut dis = dis.dissassembler(d)?;
+    let mut dis = dis.dissassembler(d, address_offset)?;
 
     loop {
         let nx = dis.next_instruction();
