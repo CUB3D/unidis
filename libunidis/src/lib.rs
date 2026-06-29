@@ -9,8 +9,8 @@ use crate::arch::Arch;
 use crate::dyn_arch::DynArch;
 
 pub mod opinion;
-mod arch;
-mod dyn_arch;
+pub mod arch;
+pub mod dyn_arch;
 pub mod cspec;
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
