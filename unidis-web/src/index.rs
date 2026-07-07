@@ -70,7 +70,7 @@ pub struct DisReq {
 /// Guess the architecture of the input bytes
 /// This will attempt disassembly with all the known architectures, picking the one that successfully disassembles the largest number of bytes
 pub fn guess_arch(x: &[u8]) -> UnidisArch {
-    let mut res = (0, UnidisArch::Arm);
+    let mut res = (0, UnidisArch::ArmV8Le);
     for a in ARCH_MAP.values() {
         let dis = UniDis::new_arch(*a).unwrap();
         let mut dis = dis.dissassembler(x.to_vec(), 0).unwrap();
