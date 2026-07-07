@@ -14,9 +14,23 @@ pub mod dyn_arch;
 pub mod cspec;
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum Endian {
+    Big,
+    Little,
+}
+
+pub enum ArmSubarch {
+    V4,
+    V5 { thumb: bool, },
+    V6,
+    V7,
+    V8 { m: bool, },
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum UnidisArch {
     X86_64,
-    Arm,
+    Arm(Endian, ArmSubarch),
     Hexagon,
     Riscv,
     AArch64,
@@ -125,7 +139,7 @@ impl Arch for ArchArmV6Be {
 #[derive(Default, Copy, Clone)]
 pub struct ArchArmV5Le;
 impl Arch for ArchArmV5Le {
-    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM_v45.pspec");
     const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
@@ -136,7 +150,7 @@ impl Arch for ArchArmV5Le {
 #[derive(Default, Copy, Clone)]
 pub struct ArchArmV5Be;
 impl Arch for ArchArmV5Be {
-    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM_v45.pspec");
     const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
@@ -147,7 +161,7 @@ impl Arch for ArchArmV5Be {
 #[derive(Default, Copy, Clone)]
 pub struct ArchArmV5tLe;
 impl Arch for ArchArmV5tLe {
-    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM_v45.pspec");
     const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5t_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
@@ -158,7 +172,7 @@ impl Arch for ArchArmV5tLe {
 #[derive(Default, Copy, Clone)]
 pub struct ArchArmV5tBe;
 impl Arch for ArchArmV5tBe {
-    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM_v45.pspec");
     const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM5t_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
@@ -169,7 +183,7 @@ impl Arch for ArchArmV5tBe {
 #[derive(Default, Copy, Clone)]
 pub struct ArchArmV4Le;
 impl Arch for ArchArmV4Le {
-    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM_v45.pspec");
     const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM4_le.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
@@ -180,7 +194,7 @@ impl Arch for ArchArmV4Le {
 #[derive(Default, Copy, Clone)]
 pub struct ArchArmV4Be;
 impl Arch for ArchArmV4Be {
-    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARMCortex.pspec");
+    const PSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM_v45.pspec");
     const CSPEC: &'static str = include_str!("../data/ARM/data/languages/ARM.cspec");
     const SLA: &'static [u8] = include_bytes!("../data/ARM/data/languages/ARM4_be.sla");
     const OPINION: Option<&'static str> = Some(include_str!("../data/ARM/data/languages/ARM.opinion"));
@@ -423,7 +437,24 @@ impl UniDis {
     pub fn new_arch(arc: UnidisArch) -> anyhow::Result<Self> {
         let x = match arc {
             UnidisArch::X86_64 => UniDis::new::<ArchX86>()?,
-            UnidisArch::Arm => UniDis::new::<ArchArmV8Le>()?,
+            UnidisArch::Arm(e, sub) => {
+                match (e, sub) {
+                    (Endian::Little, ArmSubarch::V4) => UniDis::new::<ArchArmV4Le>()?,
+                    (Endian::Big, ArmSubarch::V4) => UniDis::new::<ArchArmV4Be>()?,
+                    (Endian::Little, ArmSubarch::V5 { thumb: false }) => UniDis::new::<ArchArmV5Le>()?,
+                    (Endian::Big, ArmSubarch::V5 { thumb: false }) => UniDis::new::<ArchArmV5Be>()?,
+                    (Endian::Little, ArmSubarch::V5 { thumb: true }) => UniDis::new::<ArchArmV5tLe>()?,
+                    (Endian::Big, ArmSubarch::V5 { thumb: true }) => UniDis::new::<ArchArmV5tBe>()?,
+                    (Endian::Little, ArmSubarch::V6) => UniDis::new::<ArchArmV6Le>()?,
+                    (Endian::Big, ArmSubarch::V6) => UniDis::new::<ArchArmV6Be>()?,
+                    (Endian::Little, ArmSubarch::V7) => UniDis::new::<ArchArmV7Le>()?,
+                    (Endian::Big, ArmSubarch::V7) => UniDis::new::<ArchArmV7Be>()?,
+                    (Endian::Little, ArmSubarch::V8 { m: false }) => UniDis::new::<ArchArmV8Le>()?,
+                    (Endian::Big, ArmSubarch::V8 { m: false }) => UniDis::new::<ArchArmV8Be>()?,
+                    (Endian::Little, ArmSubarch::V8 { m: true }) => UniDis::new::<ArchArmV8mLe>()?,
+                    (Endian::Big, ArmSubarch::V8 { m: true }) => UniDis::new::<ArchArmV8mBe>()?,
+                }
+            }
             UnidisArch::Hexagon => UniDis::new::<ArchHexagon>()?,
             UnidisArch::Riscv => UniDis::new::<ArchRiscV64>()?,
             UnidisArch::AArch64 => UniDis::new::<ArchAArch64Le>()?,
