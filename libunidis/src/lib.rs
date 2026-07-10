@@ -314,7 +314,7 @@ pub const ARCHES: &[&dyn DynArch] = &[
     &Arch65c02,
 ];
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UniDisInstruction {
     pub res: NativeDisassembly,
     pub pcode: PcodeDisassembly,
@@ -416,6 +416,7 @@ impl<'a> UniDisDissassembler<'a> {
 }
 
 pub struct UniDis {
+    pub arch: UnidisArch,
     pub sleigh: GhidraSleigh,
 }
 
@@ -438,6 +439,7 @@ impl UniDis {
             .build(Ar::SLA)?;
 
         Ok(Self {
+            arch: Ar::ARCH,
             sleigh,
         })
     }
