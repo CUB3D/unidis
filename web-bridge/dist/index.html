@@ -1,0 +1,24 @@
+<body>
+  <script src="./web-bridge.js"></script>
+
+  <button onclick="foo()">Test</button>
+
+  <script>
+
+    function foo() {
+        const inputBytes = new TextEncoder().encode("Test");
+        const inputPtr = Module._alloc_bytes(inputBytes.length, 1);
+        console.log("alloc: ", inputPtr);
+        Module.HEAPU8.set(inputBytes, inputPtr);
+        console.log("set done");
+
+        let res = Module._guess_arch_bridge(inputPtr, 1 );
+
+        console.log(res);
+        // Module._free(inputPtr);
+    }
+
+    // loadWasm();
+  </script>
+</body>
+</html>

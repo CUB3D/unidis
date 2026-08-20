@@ -1,0 +1,22 @@
+FROM rust:latest AS build
+
+WORKDIR /home/code
+
+RUN apt-get update -y && apt-get install -y cmake build-essential git
+
+RUN git clone https://github.com/emscripten-core/emsdk
+
+RUN cd emsdk && ./emsdk install latest && ./emsdk activate latest
+
+RUN rustup target add wasm32-unknown-emscripten
+
+COPY ./web-bridge ./web-bridge
+COPY ./libunidis ./libunidis
+
+SHELL ["/bin/bash", "-c"] 
+
+#RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_FUNCTIONS=["alloc_bytes", "guess_arch_bridge"]'
+RUN source /home/code/emsdk/emsdk_env.sh && cd ./web-bridge && RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_RUNTIME_METHODS=["HEAPU8"]' CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER=em++ cargo build --release --target=wasm32-unknown-emscripten
+
+
+RUN /bin/bash

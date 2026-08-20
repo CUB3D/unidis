@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = [
+members = ["emscripten-test/web-bridge",
     "libunidis",
     "unidis",
     "unidis-web",
