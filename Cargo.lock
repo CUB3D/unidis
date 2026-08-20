@@ -1919,6 +1919,11 @@ dependencies = [
 [[package]]
 name = "web-bridge"
 version = "0.1.0"
+dependencies = [
+ "libunidis",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "winapi"

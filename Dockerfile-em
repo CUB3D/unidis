@@ -16,7 +16,7 @@ COPY ./libunidis ./libunidis
 SHELL ["/bin/bash", "-c"] 
 
 #RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_FUNCTIONS=["alloc_bytes", "guess_arch_bridge"]'
-RUN source /home/code/emsdk/emsdk_env.sh && cd ./web-bridge && RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_RUNTIME_METHODS=["HEAPU8"] -C link-arg=-s -C link-arg=EXCEPTION_STACK_TRACES=1' CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER=em++ cargo build --release --target=wasm32-unknown-emscripten
+RUN source /home/code/emsdk/emsdk_env.sh && cd ./web-bridge && RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_RUNTIME_METHODS=["HEAPU8"] -C link-arg=-s -C link-arg=EXCEPTION_STACK_TRACES=1 -C link-arg=-s -C link-arg=ASSERTIONS=1' CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER=em++ cargo build --release --target=wasm32-unknown-emscripten
 
 
 RUN /bin/bash

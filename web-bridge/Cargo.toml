@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 libunidis = { path = "../libunidis"}
-#console_error_panic_hook = "0.1.7"
+tracing = "=0.1.44"
+tracing-subscriber = { version = "=0.3.23", features = ["env-filter", "tracing-log"] }

@@ -7,12 +7,12 @@
 
     function foo() {
         const inputBytes = new TextEncoder().encode("Test");
-        const inputPtr = Module._alloc_bytes(inputBytes.length, 1);
+        const inputPtr = Module._alloc_bytes(inputBytes.length, 8);
         console.log("alloc: ", inputPtr);
         Module.HEAPU8.set(inputBytes, inputPtr);
         console.log("set done");
 
-        let res = Module._guess_arch_bridge(inputPtr, 1 );
+        let res = Module._guess_arch_bridge(inputPtr, 4);
 
         console.log(res);
         // Module._free(inputPtr);
