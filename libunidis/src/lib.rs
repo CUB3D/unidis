@@ -316,14 +316,22 @@ pub const ARCHES: &[&dyn DynArch] = &[
     &ArchArmV5tBe,
     &ArchArmV4Le,
     &ArchArmV4Be,
+
+    // These cause crashes in emscripten, might be bugs in libsla
+    #[cfg(not(target_os = "emscripten"))]
     &ArchHexagon,
     &ArchRiscV64,
     &ArchRiscV32,
     &ArchRiscV64Andestar,
+    #[cfg(not(target_os = "emscripten"))]
     &ArchAArch64Le,
+    #[cfg(not(target_os = "emscripten"))]
     &ArchAArch64Be,
+    #[cfg(not(target_os = "emscripten"))]
     &ArchAArch64Apple,
+    #[cfg(not(target_os = "emscripten"))]
     &Arch6502,
+    #[cfg(not(target_os = "emscripten"))]
     &Arch65c02,
 ];
 

@@ -1098,6 +1098,7 @@ dependencies = [
  "anyhow",
  "clap",
  "libsla",
+ "libsla-sys",
  "xmltree",
 ]
 

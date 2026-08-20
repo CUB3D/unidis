@@ -4,33 +4,34 @@ use tracing::instrument;
 use tracing::level_filters::LevelFilter;
 use libundis::{ARCHES, UniDis, UnidisArch};
 
-pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
-    tracing::info!("get_arch_map(_)");
+// pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
+//     tracing::info!("get_arch_map(_)");
+//
+//     let mut o = BTreeMap::new();
+//     for a in ARCHES {
+//         o.insert(a.get_arch_id().to_string(), a.get_arch());
+//     }
+//     o
+// }
 
-    let mut o = BTreeMap::new();
-    for a in ARCHES {
-        o.insert(a.get_arch_id().to_string(), a.get_arch());
-    }
-    o
-}
-
-const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
+// const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
 
 pub fn guess_arch(x: &[u8]) -> UnidisArch {
     tracing::info!("guess_arch(_)");
 
     let mut res = (0, UnidisArch::ArmV8Le);
-    for a in ARCH_MAP.values() {
-        let dis = UniDis::new_arch(*a).expect("new arch fail");
-    //     let mut dis = dis.dissassembler(x.to_vec(), 0).expect("dis fail");
-    //
-    //     let mut c = 0;
-    //     while let Ok(Some(i)) = dis.next_instruction() {
-    //         c += i.bytes.len();
-    //     }
-    //     if c > res.0 {
-    //         res = (c, *a);
-    //     }
+    for a in ARCHES {
+        println!("Trying: {:?}", a.get_arch_id());
+        let dis = UniDis::new_arch(a.get_arch()).expect("new arch fail");
+        let mut dis = dis.dissassembler(x.to_vec(), 0).expect("dis fail");
+
+        let mut c = 0;
+        while let Ok(Some(i)) = dis.next_instruction() {
+            c += i.bytes.len();
+        }
+        if c > res.0 {
+            res = (c, a.get_arch());
+        }
     }
 
     res.1

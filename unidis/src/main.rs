@@ -168,7 +168,9 @@ fn main() -> anyhow::Result<()> {
             //     dis_binary(&args, arch, section_data)?;
             // }
         }
-        _ => panic!(),
+        _ => {
+            dis_binary(args.arch.unwrap(), d, 0, &mut count_limit).unwrap();
+        },
     }
 
 
