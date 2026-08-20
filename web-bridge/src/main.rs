@@ -2,6 +2,7 @@ use std::sync::LazyLock;
 use std::collections::BTreeMap;
 
 use libundis::{ARCHES, UniDis, UnidisArch};
+use std::panic;
 
 pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
     let mut o = BTreeMap::new();
@@ -41,14 +42,14 @@ pub extern "C" fn guess_arch_bridge(x: *const u8, len: usize) -> usize {
 }
 
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn alloc_bytes(size: usize, align: usize) -> *mut u8 {
-    use std::alloc::{Layout, alloc};
-    let layout = Layout::from_size_align(size, align).expect("Alloc fail");
-    alloc(layout)
+pub extern "C" fn alloc_bytes(size: usize, align: usize) -> *mut u8 {
+    let layout = std::alloc::Layout::from_size_align(size, align).expect("Alloc fail");
+    unsafe { std::alloc::alloc(layout) }
 }
 
 pub fn main() {
+    // panic::set_hook(Box::new(console_error_panic_hook::hook));
     unsafe {
-        std::env::set_var("RUST_BACKTRACE", "1");
+        std::env::set_var("RUST_BACKTRACE", "full");
     }
 }
