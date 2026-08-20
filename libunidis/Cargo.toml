@@ -10,7 +10,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 libsla = "=1.2.0"
-#libsla-sys = {version = "0.1.5", features = ["asan", "clang"]}
+#libsla-sys = {path = "../libsla-sys"}
+#libsla = { path = "../libsla"}
 anyhow = "=1.0.103"
 xmltree = "=0.12.0"
 clap = { version = "=4.6.1", features = ["derive"] }
