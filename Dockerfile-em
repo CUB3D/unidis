@@ -15,8 +15,7 @@ COPY ./libunidis ./libunidis
 
 SHELL ["/bin/bash", "-c"] 
 
-#RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_FUNCTIONS=["alloc_bytes", "guess_arch_bridge"]'
-RUN source /home/code/emsdk/emsdk_env.sh && cd ./web-bridge && RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_RUNTIME_METHODS=["HEAPU8"] -C link-arg=-s -C link-arg=EXCEPTION_STACK_TRACES=1 -C link-arg=-s -C link-arg=ASSERTIONS=0 -C link-arg=-s -C link-arg=ALLOW_MEMORY_GROWTH=1 -C link-arg=-s -C link-arg=EXCEPTION_DEBUG=1 -C link-arg=-s -C link-arg=SAFE_HEAP=0 -C link-arg=-s -C link-arg=EMULATE_FUNCTION_POINTER_CASTS=1 -C link-arg=-s -C link-arg=MALLOC=emmalloc' CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER=em++ cargo build --release --target=wasm32-unknown-emscripten
+RUN source /home/code/emsdk/emsdk_env.sh && cd ./web-bridge && CXXFLAGS="-fwasm-exceptions" RUSTFLAGS='-C link-arg=-s -C link-arg=EXPORTED_RUNTIME_METHODS=["HEAPU8"] -C link-arg=-s -C link-arg=EXCEPTION_STACK_TRACES=1 -C link-arg=-s -C link-arg=ASSERTIONS=2 -C link-arg=-s -C link-arg=ALLOW_MEMORY_GROWTH=1 -C link-arg=-s -C link-arg=EXCEPTION_DEBUG=1 -C link-arg=-s -C link-arg=SAFE_HEAP=0 -C link-arg=-s -C link-arg=MALLOC=emmalloc' CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER=em++ cargo build --release --target=wasm32-unknown-emscripten
 
 
 RUN /bin/bash

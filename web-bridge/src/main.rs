@@ -1,28 +1,26 @@
-use std::sync::LazyLock;
 use std::collections::BTreeMap;
-use tracing::instrument;
+use std::sync::LazyLock;
 use tracing::level_filters::LevelFilter;
 use libundis::{ARCHES, UniDis, UnidisArch};
 
-// pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
-//     tracing::info!("get_arch_map(_)");
-//
-//     let mut o = BTreeMap::new();
-//     for a in ARCHES {
-//         o.insert(a.get_arch_id().to_string(), a.get_arch());
-//     }
-//     o
-// }
+pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
+    tracing::info!("get_arch_map(_)");
 
-// const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
+    let mut o = BTreeMap::new();
+    for a in ARCHES {
+        o.insert(a.get_arch_id().to_string(), a.get_arch());
+    }
+    o
+}
+
+const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
 
 pub fn guess_arch(x: &[u8]) -> UnidisArch {
     tracing::info!("guess_arch(_)");
 
     let mut res = (0, UnidisArch::ArmV8Le);
-    for a in ARCHES {
-        println!("Trying: {:?}", a.get_arch_id());
-        let dis = UniDis::new_arch(a.get_arch()).expect("new arch fail");
+    for a in ARCH_MAP.values() {
+        let dis = UniDis::new_arch(*a).expect("new arch fail");
         let mut dis = dis.dissassembler(x.to_vec(), 0).expect("dis fail");
 
         let mut c = 0;
@@ -30,7 +28,7 @@ pub fn guess_arch(x: &[u8]) -> UnidisArch {
             c += i.bytes.len();
         }
         if c > res.0 {
-            res = (c, a.get_arch());
+            res = (c, *a);
         }
     }
 
@@ -45,7 +43,8 @@ pub extern "C" fn guess_arch_bridge(x: *mut u8, len: usize) -> usize {
     }
     let slc = unsafe { std::slice::from_raw_parts(x, len) };
     // print!("Guess arch");
-    guess_arch(slc);
+    let a = guess_arch(slc);
+    println!("{:?}", a);
 
     return 0;
 }
@@ -71,4 +70,9 @@ pub fn main() {
     unsafe {
         std::env::set_var("RUST_BACKTRACE", "full");
     }
+}
+
+#[test]
+pub fn foo() {
+    guess_arch(b"Test");
 }

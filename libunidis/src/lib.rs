@@ -320,16 +320,10 @@ pub const ARCHES: &[&dyn DynArch] = &[
     &ArchRiscV64,
     &ArchRiscV32,
     &ArchRiscV64Andestar,
-    // These cause crashes in emscripten, might be bugs in libsla
-    #[cfg(not(target_os = "emscripten"))]
     &ArchAArch64Le,
-    #[cfg(not(target_os = "emscripten"))]
     &ArchAArch64Be,
-    #[cfg(not(target_os = "emscripten"))]
     &ArchAArch64Apple,
-    // #[cfg(not(target_os = "emscripten"))]
     &Arch6502,
-    #[cfg(not(target_os = "emscripten"))]
     &Arch65c02,
 ];
 
@@ -508,11 +502,11 @@ pub mod test {
 
     #[test]
     pub fn test_1() -> Result<(), Box<dyn Error>> {
-        let mut x86 = UniDis::new::<ArchX86>()?;
+        let x86 = UniDis::new::<ArchX86>()?;
         let mut dis = x86.dissassembler(vec![
             0x89, 0xF0, 0x85, 0xFF, 0x74, 0x09, 0x99, 0xF7, 0xFF, 0x89, 0xF8, 0x89, 0xD7, 0xEB,
             0xF3, 0xC3,
-        ])?;
+        ], 0)?;
         while let Some(i) = dis.next_instruction()? {
             println!("{}", i.to_str());
         }
