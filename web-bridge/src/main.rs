@@ -186,7 +186,6 @@ pub fn assemble_impl(input_data: &str, base_addr: &str, arch: &str) -> anyhow::R
         out.push_str(&format!("{:02X} ", c));
     }
     let out = out.trim().to_string();
-    println!("out = {out:?}");
 
     // Returning dies here, probably unsoundness in keystone causing a fault on dropping the engine. Lets just do this for now
     emscripten_functions::emscripten::run_script(
