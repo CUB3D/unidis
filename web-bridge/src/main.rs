@@ -14,7 +14,7 @@ pub fn get_arch_map() -> BTreeMap<String, UnidisArch> {
     o
 }
 
-const ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
+static ARCH_MAP: LazyLock<BTreeMap<String, UnidisArch>> = LazyLock::new(get_arch_map);
 
 pub fn guess_arch(x: &[u8]) -> anyhow::Result<UnidisArch> {
     tracing::info!("guess_arch(_)");
@@ -37,10 +37,17 @@ pub fn guess_arch(x: &[u8]) -> anyhow::Result<UnidisArch> {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn alloc_bytes(size: usize, align: usize) -> *mut u8 {
+pub unsafe extern "C" fn alloc_bytes(size: usize, align: usize) -> *mut u8 {
     tracing::info!("alloc_bytes(size: {size}, align: {align})");
-    let layout = std::alloc::Layout::from_size_align(size, align).expect("Alloc fail");
+    let layout = std::alloc::Layout::from_size_align(size, align).expect("Layout creation failed");
     unsafe { std::alloc::alloc(layout) }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn free_bytes(ptr: *mut u8, size: usize, align: usize) {
+    tracing::info!("free_bytes(..., size: {size}, align: {align})");
+    let layout = std::alloc::Layout::from_size_align(size, align).expect("Layout creation failed");
+    unsafe { std::alloc::dealloc(ptr, layout) };
 }
 
 pub fn load() {
@@ -63,16 +70,21 @@ pub fn load() {
     tracing::info!("Load done");
 }
 
-pub fn dissassemble_impl(input_data: &str, base_addr: &str, arch: &str, include_addr: bool, include_bytes: bool) -> anyhow::Result<String> {
+pub fn disassemble_impl(input_data: &str, base_addr: &str, arch: &str, include_addr: bool, include_bytes: bool) -> anyhow::Result<String> {
+    tracing::info!("disassemble_impl(input: {input_data:?}, base_addr: {base_addr:?}, arch: {arch:?}, include_addr: {include_addr:?}, include_bytes: {include_bytes:?})");
+    if input_data.is_empty() {
+        return Err(anyhow::anyhow!("Give me something to disassemble first"));
+    }
+
     // Parse base addr
-    let base_addr = if base_addr.starts_with("0x") {
-        u64::from_str_radix(&base_addr[2..], 16)
+    let base_addr = if let Some(stripped) = base_addr.strip_prefix("0x") {
+        u64::from_str_radix(stripped, 16)
     } else {
         base_addr.parse::<u64>()
     };
     let base_addr = base_addr.context("Failed to parse number")?;
 
-    let x = hex::decode(input_data.replace(" ", "")).context("Hex decode fail")?;
+    let x = hex::decode(input_data.replace(" ", "")).context("I can't decode that as hex, sorry")?;
 
     let arch = if arch == "Guess for me" {
         match guess_arch(&x) {
@@ -122,9 +134,14 @@ pub fn dissassemble_impl(input_data: &str, base_addr: &str, arch: &str, include_
 }
 
 pub fn assemble_impl(input_data: &str, base_addr: &str, arch: &str) -> anyhow::Result<String> {
+    tracing::info!("assemble_impl(input: {input_data:?}, base_addr: {base_addr:?}, arch: {arch:?})");
+    if input_data.is_empty() {
+        return Err(anyhow::anyhow!("Give me something to assemble first"));
+    }
+
     // Parse base addr
-    let base_addr = if base_addr.starts_with("0x") {
-        u64::from_str_radix(&base_addr[2..], 16)
+    let base_addr = if let Some(stripped) = base_addr.strip_prefix("0x") {
+        u64::from_str_radix(stripped, 16)
     } else {
         base_addr.parse::<u64>()
     };
@@ -133,7 +150,7 @@ pub fn assemble_impl(input_data: &str, base_addr: &str, arch: &str) -> anyhow::R
     use keystone_engine::*;
 
     let (arch, mode) = if arch == "Guess for me" {
-        return Err(anyhow::anyhow!("I can't guess what you want to assemble"));
+        return Err(anyhow::anyhow!("I can't guess what architecture you want to assemble for!"));
     } else {
         match ARCH_MAP.get(arch) {
             Some(v) => match v {
@@ -142,7 +159,7 @@ pub fn assemble_impl(input_data: &str, base_addr: &str, arch: &str) -> anyhow::R
                 UnidisArch::AArch64 => (Arch::ARM64, Mode::LITTLE_ENDIAN),
                 UnidisArch::Hexagon => (Arch::HEXAGON, Mode::LITTLE_ENDIAN),
                 _ => {
-                    return Err(anyhow::anyhow!("Unsupported architecture"));
+                    return Err(anyhow::anyhow!("Unsupported architecture, currently we can only assemble for:\n- X86_64\n- Arm\n- ARM64\n- Hexagon\n"));
                 },
             },
             None => {
@@ -185,7 +202,7 @@ pub fn assemble_impl(input_data: &str, base_addr: &str, arch: &str) -> anyhow::R
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn assemble(
+pub unsafe extern "C" fn assemble(
     data_ptr: *mut u8,
     data_len: usize,
 
@@ -207,11 +224,9 @@ pub extern "C" fn assemble(
     let arch = String::from_utf8(arch.to_vec()).expect("Bad arch");
 
     emscripten_functions::emscripten::run_script(
-        format!(
-            r##"
-                document.getElementById("output_title").textContent = "Assembly Output";
-            "##,
-        )
+    r##"
+            document.getElementById("output_title").textContent = "Assembly Output";
+        "##
     );
 
     match assemble_impl(&input_data, &base_addr, &arch) {
@@ -242,7 +257,7 @@ pub extern "C" fn assemble(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn dissassemble(
+pub unsafe extern "C" fn dissassemble(
     data_ptr: *mut u8,
     data_len: usize,
 
@@ -267,14 +282,12 @@ pub extern "C" fn dissassemble(
     let arch = String::from_utf8(arch.to_vec()).expect("Bad arch");
 
     emscripten_functions::emscripten::run_script(
-        format!(
-            r##"
-                document.getElementById("output_title").textContent = "Disassembly Output";
-            "##,
-        )
+        r##"
+            document.getElementById("output_title").textContent = "Disassembly Output";
+        "##,
     );
 
-    match dissassemble_impl(&input_data, &base_addr, &arch, include_addr != 0, include_bytes != 0) {
+    match disassemble_impl(&input_data, &base_addr, &arch, include_addr != 0, include_bytes != 0) {
         Ok(out) => {
             println!("Disas ok");
             emscripten_functions::emscripten::run_script(

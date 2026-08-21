@@ -352,10 +352,8 @@ impl UniDisInstruction {
         all_in.dedup();
 
         for p in &self.pcode.instructions {
-            if let Some(o) = &p.output {
-                if let Some(pos) = all_in.iter().position(|p| p == o) {
-                    all_in.remove(pos);
-                }
+            if let Some(o) = &p.output && let Some(pos) = all_in.iter().position(|p| p == o) {
+                all_in.remove(pos);
             }
         }
 

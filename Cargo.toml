@@ -3,6 +3,5 @@ resolver = "3"
 members = [
     "libunidis",
     "unidis",
-    "unidis-web",
     "web-bridge"
 ]

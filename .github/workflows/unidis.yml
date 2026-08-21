@@ -3,7 +3,7 @@ name: Build web image
 on:
   push:
     paths: 
-      - 'unidis-web/**'
+      - 'web-bridge/**'
       - 'libunidis/**'
 
 env:
