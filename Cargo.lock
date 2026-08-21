@@ -700,6 +700,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
 
 [[package]]
+name = "emscripten-functions"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4547520aeddeb32717ddd02f83888d27d5db7dd5932941142194015fda5b06aa"
+dependencies = [
+ "cc",
+ "emscripten-functions-sys",
+]
+
+[[package]]
+name = "emscripten-functions-sys"
+version = "5.0.401"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c1f3aa9a59cdd296650e7ba9bb966ad418aa754c17a5af69860a51153106a95"
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1920,6 +1936,10 @@ dependencies = [
 name = "web-bridge"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "emscripten-functions",
+ "hex",
+ "keystone-engine",
  "libunidis",
  "tracing",
  "tracing-subscriber",

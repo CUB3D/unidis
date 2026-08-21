@@ -1,24 +1,119 @@
-<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="./web-bridge.js"></script>
 
-  <button onclick="foo()">Test</button>
+  <title>Unidis</title>
+
+  <link rel="stylesheet" href="bootstrap.min.css">
 
   <script>
 
-    function foo() {
-        const inputBytes = new TextEncoder().encode("Test");
+    function dissasemble() {
+
+        const text = document.getElementById("input_data").value;
+        const inputBytes = new TextEncoder().encode(text);
         const inputPtr = Module._alloc_bytes(inputBytes.length, 8);
-        console.log("alloc: ", inputPtr);
         Module.HEAPU8.set(inputBytes, inputPtr);
-        console.log("set done");
 
-        let res = Module._guess_arch_bridge(inputPtr, 4);
+        const baseaddr = document.getElementById("base_addr").value;
+        const inputBytesBaseAddr = new TextEncoder().encode(baseaddr);
+        const inputPtrBaseAddr = Module._alloc_bytes(inputBytesBaseAddr.length, 8);
+        Module.HEAPU8.set(inputBytesBaseAddr, inputPtrBaseAddr);
 
+        const arch = document.getElementById("arch").selectedOptions[0].value;
+        const inputBytesArch = new TextEncoder().encode(arch);
+        const inputPtrArch = Module._alloc_bytes(inputBytesArch.length, 8);
+        Module.HEAPU8.set(inputBytesArch, inputPtrArch);
+
+        const include_addr = document.getElementById("include_addr").checked;
+        const include_bytes = document.getElementById("include_bytes").checked;
+
+        const res = Module._dissassemble(inputPtr, inputBytes.length, inputPtrBaseAddr, inputBytesBaseAddr.length, inputPtrArch, inputBytesArch.length, include_addr, include_bytes);
         console.log(res);
-        // Module._free(inputPtr);
     }
 
-    // loadWasm();
+    function assemble() {
+        const text = document.getElementById("input_data").value;
+        const inputBytes = new TextEncoder().encode(text);
+        const inputPtr = Module._alloc_bytes(inputBytes.length, 8);
+        Module.HEAPU8.set(inputBytes, inputPtr);
+
+        const baseaddr = document.getElementById("base_addr").value;
+        const inputBytesBaseAddr = new TextEncoder().encode(baseaddr);
+        const inputPtrBaseAddr = Module._alloc_bytes(inputBytesBaseAddr.length, 8);
+        Module.HEAPU8.set(inputBytesBaseAddr, inputPtrBaseAddr);
+
+        const arch = document.getElementById("arch").selectedOptions[0].value;
+        const inputBytesArch = new TextEncoder().encode(arch);
+        const inputPtrArch = Module._alloc_bytes(inputBytesArch.length, 8);
+        Module.HEAPU8.set(inputBytesArch, inputPtrArch);
+
+        const res = Module._assemble(inputPtr, inputBytes.length, inputPtrBaseAddr, inputBytesBaseAddr.length, inputPtrArch, inputBytesArch.length);
+        console.log(res);
+    }
   </script>
+</head>
+<body>
+
+<div class="container">
+
+<div class="container-md">
+
+    <div class="row g-3 align-items-end mb-3">
+      <div class="col-sm-6">
+        <label for="base_addr" class="form-label fw-semibold">Base Address</label>
+        <input type="text" class="form-control font-monospace" id="base_addr" name="base_addr" value="0x00000000">
+      </div>
+      <div class="col-sm-6">
+        <label for="arch" class="form-label fw-semibold">Architecture</label>
+        <select name="arch" id="arch" class="form-select">
+          <option value="Guess for me">Guess for me</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="input_data" class="form-label fw-semibold">Input</label>
+      <textarea id="input_data" name="input_data" rows="6" class="form-control font-monospace" placeholder="e.g. 73 00 00 00 ... or mov RAX, 0x0"></textarea>
+      <div class="form-text">Enter hex bytes separated by spaces or assembly.</div>
+    </div>
+
+    <div class="row g-3 align-items-end mb-3">
+      <div class="col-sm-6">
+        <label for="include_addr" class="form-check-label fw-semibold">Include address</label>
+        <input type="checkbox" class="form-check-input" id="include_addr" name="include_addr" value=""  {% if include_address %} checked {% endif %}>
+      </div>
+      <div class="col-sm-6">
+        <label for="include_bytes" class="form-check-label fw-semibold">Include bytes</label>
+        <input type="checkbox" class="form-check-input" id="include_bytes" name="include_bytes" value="" {% if include_bytes %} checked {% endif %}>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary px-4" onclick="dissasemble()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="me-1" aria-hidden="true" style="vertical-align: -0.125em;">
+        <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14A2.5 2.5 0 0 1 11.5 14v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3z"/>
+      </svg>
+      Disassemble
+    </button>
+    <button type="submit" class="btn btn-secondary px-4" onclick="assemble()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="me-1" aria-hidden="true" style="vertical-align: -0.125em;">
+        <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14A2.5 2.5 0 0 1 11.5 14v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3z"/>
+      </svg>
+      Assemble
+    </button>
+
+  <hr class="my-4">
+
+  <div class="mb-3">
+    <label id="output_title" class="form-label fw-semibold">Output</label>
+    <textarea id="output" readonly rows="10" class="form-control font-monospace bg-dark text-success" placeholder="Output will appear here..."></textarea>
+  </div>
+</div>
+</div>
 </body>
+
+<script src="bootstrap.bundle.min.js"></script>
 </html>
